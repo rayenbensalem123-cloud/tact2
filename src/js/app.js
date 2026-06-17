@@ -610,8 +610,10 @@ canvas.addEventListener('touchstart', e => {
     }
     updateUI(); render();
   } else if (currentTool === 'pen' || currentTool === 'line' || currentTool === 'arrow' || currentTool === 'dashed' || currentTool === 'rect' || currentTool === 'circle') {
+    touchDragIdx = -1; dragPlayerIndex = -1; dragEquipIndex = -1; dragTextIndex = -1;
     drawings.startStroke(currentTool, coords.x, coords.y, drawings.currentColor, drawings.currentWidth);
   } else if (currentTool === 'eraser') {
+    touchDragIdx = -1; dragPlayerIndex = -1; dragEquipIndex = -1; dragTextIndex = -1;
     const cx = dev.x - pitchOffsetX, cy = dev.y - pitchOffsetY;
     const hd = drawings.hitTest(cx, cy, canvasScale);
     if (hd >= 0) { drawings.removeAt(hd); markDirty(); history.push(players.players, drawings.drawings, equipment.items, connections); render(); return; }
@@ -620,6 +622,7 @@ canvas.addEventListener('touchstart', e => {
     const hp = players.findByCanvasPos(dev.x - pitchOffsetX, dev.y - pitchOffsetY, canvasScale);
     if (hp >= 0) { players.remove(hp); cleanupConnections(); history.push(players.players, drawings.drawings, equipment.items, connections); markDirty(); render(); updateUI(); return; }
   } else if (currentTool === 'text') {
+    touchDragIdx = -1; dragPlayerIndex = -1; dragEquipIndex = -1; dragTextIndex = -1;
     const textSize = parseInt(document.getElementById('textSize').value);
     drawings.currentFontSize = textSize;
     const snapped = snapToGrid(coords.x, coords.y);
@@ -708,6 +711,13 @@ canvas.addEventListener('touchmove', e => {
   } else if (currentTool === 'pen' || currentTool === 'line' || currentTool === 'arrow' || currentTool === 'dashed' || currentTool === 'rect' || currentTool === 'circle') {
     drawings.continueStroke(coords.x, coords.y);
     render();
+    if (currentTool !== 'pen') {
+      ctx.save();
+      ctx.translate(pitchOffsetX, pitchOffsetY);
+      ctx.scale(canvasScale, canvasScale);
+      drawings.drawPreview(ctx, 1, currentTool, drawings.drawStart, coords);
+      ctx.restore();
+    }
   }
 }, { passive: false });
 
@@ -896,6 +906,11 @@ function setTool(tool) {
     else connPlacement = null;
     render();
   }
+  touchDragIdx = -1;
+  dragPlayerIndex = -1;
+  dragEquipIndex = -1;
+  dragTextIndex = -1;
+  dragStartPositions = null;
   currentTool = tool;
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
   canvas.style.cursor = tool === 'select' ? 'default' : tool === 'eraser' ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Crect x=%224%22 y=%228%22 width=%2224%22 height=%2216%22 rx=%223%22 fill=%22%23e94560%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3Crect x=%228%22 y=%2212%22 width=%2216%22 height=%221%22 fill=%22%23fff%22/%3E%3Cpath d=%22M6 24 L14 28 L26 24%22 fill=%22none%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3C/svg%3E") 16 16, crosshair' : 'crosshair';

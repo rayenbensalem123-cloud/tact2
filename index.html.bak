@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TacticalPad - Soccer Tactics Board</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; display: flex; height: 100vh; overflow: hidden; user-select: none; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #16213e; }
+::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+
+/* Toolbar */
+.toolbar { width: 52px; background: #16213e; display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 2px; border-right: 1px solid #0f3460; z-index: 10; }
+.tool-btn { width: 40px; height: 40px; border: none; background: transparent; color: #8899aa; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all .15s; position: relative; }
+.tool-btn:hover { background: #0f3460; color: #fff; }
+.tool-btn.active { background: #e94560; color: #fff; }
+.tool-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.tool-divider { width: 32px; height: 1px; background: #0f3460; margin: 4px 0; }
+
+/* Top bar */
+.topbar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #16213e; border-bottom: 1px solid #0f3460; flex-wrap: wrap; min-height: 44px; }
+.topbar label { font-size: 12px; color: #8899aa; }
+.topbar select, .topbar input[type=color] { background: #0f3460; color: #eee; border: 1px solid #1a4a7a; border-radius: 4px; padding: 3px 6px; font-size: 12px; cursor: pointer; }
+.topbar input[type=color] { width: 30px; height: 28px; padding: 2px; }
+.topbar input[type=range] { width: 60px; accent-color: #e94560; }
+.topbar button { background: #0f3460; color: #eee; border: 1px solid #1a4a7a; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all .15s; }
+.topbar button:hover { background: #e94560; border-color: #e94560; }
+.topbar .sep { width: 1px; height: 24px; background: #0f3460; }
+
+/* Main layout */
+.main-area { flex: 1; display: flex; flex-direction: column; }
+.canvas-wrap { flex: 1; position: relative; overflow: hidden; background: #0d0d1a; display: flex; align-items: center; justify-content: center; }
+#pitchCanvas { cursor: default; border-radius: 4px; box-shadow: 0 4px 30px rgba(0,0,0,.5); }
+
+/* Right panel */
+.panel { width: 220px; background: #16213e; border-left: 1px solid #0f3460; display: flex; flex-direction: column; font-size: 13px; overflow-y: auto; }
+.panel h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8899aa; padding: 10px 12px 6px; }
+.panel-section { padding: 0 12px 12px; }
+.panel label { font-size: 11px; color: #8899aa; display: block; margin-bottom: 2px; }
+.panel input[type=text], .panel input[type=number], .panel select { width: 100%; background: #0f3460; color: #eee; border: 1px solid #1a4a7a; border-radius: 4px; padding: 4px 8px; font-size: 12px; margin-bottom: 6px; }
+.panel input[type=color] { width: 100%; height: 30px; padding: 2px; border: 1px solid #1a4a7a; border-radius: 4px; background: #0f3460; cursor: pointer; margin-bottom: 6px; }
+.panel .btn { background: #0f3460; color: #eee; border: 1px solid #1a4a7a; border-radius: 4px; padding: 5px 10px; font-size: 12px; cursor: pointer; transition: all .15s; display: block; width: 100%; text-align: center; margin-bottom: 4px; }
+.panel .btn:hover { background: #e94560; border-color: #e94560; }
+.panel .btn-group { display: flex; gap: 4px; }
+.panel .btn-group .btn { flex: 1; }
+.panel .player-list { max-height: 200px; overflow-y: auto; }
+.panel .player-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 2px; }
+.panel .player-item:hover { background: #0f3460; }
+.panel .player-item.active { background: #e9456033; border: 1px solid #e94560; }
+.panel .player-dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; border: 2px solid rgba(255,255,255,.3); }
+.panel .formation-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.panel .formation-grid .btn { font-size: 10px; padding: 4px 2px; }
+
+/* Tooltip */
+.tool-btn[data-tip]:hover::after { content: attr(data-tip); position: absolute; left: 52px; top: 50%; transform: translateY(-50%); background: #0d0d1a; color: #eee; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; z-index: 100; border: 1px solid #1a4a7a; }
+</style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="toolbar" id="toolbar">
+  <button class="tool-btn active" data-tip="Select (V)" id="tool-select"><svg viewBox="0 0 24 24"><path d="M4 3l13 11-7 2-3 7z"/></svg></button>
+  <button class="tool-btn" data-tip="Pen (P)" id="tool-pen"><svg viewBox="0 0 24 24"><path d="M3 17v4h4l11-11-4-4L3 17zm14-14l4 4-2 2-4-4 2-2z"/></svg></button>
+  <button class="tool-btn" data-tip="Line (L)" id="tool-line"><svg viewBox="0 0 24 24"><path d="M4 20L20 4"/></svg></button>
+  <button class="tool-btn" data-tip="Arrow (A)" id="tool-arrow"><svg viewBox="0 0 24 24"><path d="M4 12h12l-4-4m4 4l-4 4"/></svg></button>
+  <button class="tool-btn" data-tip="Dashed (D)" id="tool-dashed"><svg viewBox="0 0 24 24"><path d="M4 12h3m4 0h3m4 0h3"/></svg></button>
+  <button class="tool-btn" data-tip="Rectangle (R)" id="tool-rect"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg></button>
+  <button class="tool-btn" data-tip="Circle (C)" id="tool-circle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-tip="Eraser (E)" id="tool-eraser"><svg viewBox="0 0 24 24"><path d="M16 3L3 16l5 5 13-13-5-5z"/></svg></button>
+  <button class="tool-btn" data-tip="Undo (Ctrl+Z)" id="tool-undo"><svg viewBox="0 0 24 24"><path d="M12 5c-4 0-7 2-9 5l-2-2v6h6l-2-2c2-2 4-3 7-3 4 0 7 3 7 7h2c0-5-4-9-9-9z"/></svg></button>
+  <button class="tool-btn" data-tip="Redo (Ctrl+Y)" id="tool-redo"><svg viewBox="0 0 24 24"><path d="M12 5c5 0 9 4 9 9h-2c0-4-3-7-7-7-3 0-5 1-7 3l2 2H1V6l2 2c2-3 5-5 9-5z"/></svg></button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-tip="Clear All" id="tool-clear"><svg viewBox="0 0 24 24"><path d="M19 4h-4l-1-1H9L8 4H4v2h15M5 19c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7H5v12z"/></svg></button>
+  <button class="tool-btn" data-tip="Export PNG" id="tool-export"><svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6-7l-4 4h3v6h2V9h3l-4-4z"/></svg></button>
+</div>
+
+<!-- Main -->
+<div class="main-area">
+  <div class="topbar" id="topbar">
+    <label>View:</label>
+    <select id="pitchView">
+      <option value="full">Full Pitch</option>
+      <option value="half">Half (Attack)</option>
+      <option value="half-def">Half (Defend)</option>
+    </select>
+    <div class="sep"></div>
+    <label>Color:</label>
+    <input type="color" id="drawColor" value="#e94560">
+    <label>Width:</label>
+    <input type="range" id="drawWidth" min="1" max="8" value="2" step="0.5">
+    <span id="widthLabel" style="font-size:11px;color:#8899aa;min-width:20px">2</span>
+    <div class="sep"></div>
+    <label>Home:</label>
+    <input type="color" id="homeColor" value="#e94560">
+    <label>Away:</label>
+    <input type="color" id="awayColor" value="#4a9eff">
+    <div class="sep"></div>
+    <button id="btnAddHome">+ Home</button>
+    <button id="btnAddAway">+ Away</button>
+    <button id="btnDeletePlayer">Delete</button>
+  </div>
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="pitchCanvas"></canvas>
+  </div>
+</div>
+
+<!-- Right Panel -->
+<div class="panel" id="panel">
+  <h3>Formations</h3>
+  <div class="panel-section">
+    <div class="formation-grid">
+      <button class="btn" data-formation="4-3-3">4-3-3</button>
+      <button class="btn" data-formation="4-4-2">4-4-2</button>
+      <button class="btn" data-formation="4-2-3-1">4-2-3-1</button>
+      <button class="btn" data-formation="3-5-2">3-5-2</button>
+      <button class="btn" data-formation="5-3-2">5-3-2</button>
+      <button class="btn" data-formation="4-1-4-1">4-1-4-1</button>
+      <button class="btn" data-formation="3-4-3">3-4-3</button>
+      <button class="btn" data-formation="4-3-2-1">4-3-2-1</button>
+      <button class="btn" data-formation="3-4-1-2">3-4-1-2</button>
+    </div>
+  </div>
+
+  <h3>Player</h3>
+  <div class="panel-section">
+    <div class="player-list" id="playerList"></div>
+  </div>
+
+  <h3>Properties</h3>
+  <div class="panel-section">
+    <label>Name</label>
+    <input type="text" id="playerName" placeholder="Player name">
+    <label>Number</label>
+    <input type="number" id="playerNumber" min="1" max="99" value="1">
+    <label>Team</label>
+    <select id="playerTeam"><option value="home">Home</option><option value="away">Away</option></select>
+    <label>Role</label>
+    <select id="playerRole"><option value="GK">GK</option><option value="DEF">DEF</option><option value="MID">MID</option><option value="FWD">FWD</option></select>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('pitchCanvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvasWrap');
+
+// ---- State ----
+const state = {
+  pitchView: 'full',
+  tool: 'select',
+  drawColor: '#e94560',
+  drawWidth: 2,
+  homeColor: '#e94560',
+  awayColor: '#4a9eff',
+  players: [],
+  selectedPlayer: null,
+  drawings: [],
+  redoStack: [],
+  isDrawing: false,
+  drawStart: null,
+  dragPlayer: null,
+  dragOffX: 0,
+  dragOffY: 0,
+};
+
+// ---- Pitch dimensions ----
+const PITCH = { w: 680, h: 1050 };
+const HALF_W = PITCH.w / 2;
+const HALF_H = PITCH.h / 2;
+const PEN_W = 200;
+const PEN_H = 320;
+const GOAL_W = 52;
+const GOAL_H = 8;
+const CENTER_R = 75;
+const PEN_R = 10;
+
+let scale = 1;
+let offsetX = 0, offsetY = 0;
+
+function resizeCanvas() {
+  const r = wrap.getBoundingClientRect();
+  const pad = 20;
+  const maxW = r.width - pad * 2;
+  const maxH = r.height - pad * 2;
+  const aspect = PITCH.w / PITCH.h;
+  let w, h;
+  if (maxW / maxH > aspect) { h = maxH; w = h * aspect; }
+  else { w = maxW; h = w / aspect; }
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  scale = (w / PITCH.w) * dpr;
+  offsetX = (r.width - w) / 2;
+  offsetY = (r.height - h) / 2;
+  canvas.style.marginLeft = offsetX + 'px';
+  canvas.style.marginTop = offsetY + 'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  render();
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+// ---- Pitch drawing ----
+function drawPitch() {
+  const s = scale;
+  const ox = 0, oy = 0;
+  const w = PITCH.w * s, h = PITCH.h * s;
+  const hw = w / 2, hh = h / 2;
+
+  // Grass gradient
+  const grd = ctx.createLinearGradient(0, 0, 0, h);
+  grd.addColorStop(0, '#2d5a1e');
+  grd.addColorStop(0.5, '#3a7a28');
+  grd.addColorStop(1, '#2d5a1e');
+  ctx.fillStyle = grd;
+  ctx.fillRect(ox, oy, w, h);
+
+  // Grass stripes
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 12; i++) {
+    const y = (i / 12) * h;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = 2;
+
+  // Border
+  ctx.strokeRect(ox, oy, w, h);
+
+  // Center line
+  ctx.beginPath();
+  ctx.moveTo(ox, oy + hh);
+  ctx.lineTo(ox + w, oy + hh);
+  ctx.stroke();
+
+  // Center circle
+  ctx.beginPath();
+  ctx.arc(ox + hw, oy + hh, CENTER_R * s, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(ox + hw, oy + hh, 3 * s, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fill();
+
+  // Penalty areas
+  const px = (PITCH.w - PEN_W) / 2 * s;
+  const pyTop = 0;
+  const pyBot = h - PEN_H * s;
+  ctx.strokeRect(ox + px, oy + pyTop, PEN_W * s, PEN_H * s);
+  ctx.strokeRect(ox + px, oy + pyBot, PEN_W * s, PEN_H * s);
+
+  // Goal areas
+  const gx = (PITCH.w - 120) / 2 * s;
+  const gh = 48 * s;
+  ctx.strokeRect(ox + gx, oy, 120 * s, gh);
+  ctx.strokeRect(ox + gx, oy + h - gh, 120 * s, gh);
+
+  // Goals
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillRect(ox + hw - GOAL_W * s, oy - GOAL_H * s, GOAL_W * 2 * s, GOAL_H * s);
+  ctx.fillRect(ox + hw - GOAL_W * s, oy + h, GOAL_W * 2 * s, GOAL_H * s);
+
+  // Penalty dots
+  const pd = 11 * s;
+  ctx.beginPath();
+  ctx.arc(ox + hw, oy + PEN_H * s - pd, 3 * s, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(ox + hw, oy + h - PEN_H * s + pd, 3 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Penalty arcs
+  ctx.beginPath();
+  ctx.arc(ox + hw, oy + PEN_H * s - pd, PEN_R * s, -Math.PI * 0.3, Math.PI * 0.3);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(ox + hw, oy + h - PEN_H * s + pd, PEN_R * s, Math.PI * 0.7, Math.PI * 1.3);
+  ctx.stroke();
+
+  // Corner arcs
+  const cr = 15 * s;
+  [[0,0],[1,0],[0,1],[1,1]].forEach(([mx,my]) => {
+    const cx = mx ? w : 0;
+    const cy = my ? h : 0;
+    ctx.beginPath();
+    ctx.arc(ox + cx, oy + cy, cr, mx ? Math.PI : Math.PI * 1.5, my ? Math.PI * 0.5 : Math.PI * 1.5, my ? false : true);
+    ctx.stroke();
+  });
+}
+
+// ---- Players ----
+function createPlayer(team, number, name, role, x, y) {
+  return { id: Date.now() + Math.random(), team, number, name: name || `${team==='home'?'H':'A'}${number}`, role: role || 'MID', x, y, visible: true };
+}
+
+const FORMATIONS = {
+  '4-3-3': { home: [
+    [3,1,'GK','GK'],[2,4,'','DEF'],[4,4,'','DEF'],[6,4,'','DEF'],[8,4,'','DEF'],
+    [3,6,'','MID'],[5,6,'','MID'],[7,6,'','MID'],
+    [2,8,'','FWD'],[5,9,'','FWD'],[8,8,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[2,7,'','DEF'],[4,7,'','DEF'],[6,7,'','DEF'],[8,7,'','DEF'],
+    [3,5,'','MID'],[5,5,'','MID'],[7,5,'','MID'],
+    [2,3,'','FWD'],[5,2,'','FWD'],[8,3,'','FWD']
+  ]},
+  '4-4-2': { home: [
+    [3,1,'GK','GK'],[2,4,'','DEF'],[4,4,'','DEF'],[6,4,'','DEF'],[8,4,'','DEF'],
+    [1.5,6,'','MID'],[3.5,6,'','MID'],[6.5,6,'','MID'],[8.5,6,'','MID'],
+    [3,8,'','FWD'],[7,8,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[2,7,'','DEF'],[4,7,'','DEF'],[6,7,'','DEF'],[8,7,'','DEF'],
+    [1.5,5,'','MID'],[3.5,5,'','MID'],[6.5,5,'','MID'],[8.5,5,'','MID'],
+    [3,3,'','FWD'],[7,3,'','FWD']
+  ]},
+  '4-2-3-1': { home: [
+    [3,1,'GK','GK'],[2,4,'','DEF'],[4,4,'','DEF'],[6,4,'','DEF'],[8,4,'','DEF'],
+    [3,6,'','MID'],[7,6,'','MID'],
+    [2,7.5,'','FWD'],[5,8,'','FWD'],[8,7.5,'','FWD'],
+    [5,9.5,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[2,7,'','DEF'],[4,7,'','DEF'],[6,7,'','DEF'],[8,7,'','DEF'],
+    [3,5,'','MID'],[7,5,'','MID'],
+    [2,3.5,'','FWD'],[5,3,'','FWD'],[8,3.5,'','FWD'],
+    [5,1.5,'','FWD']
+  ]},
+  '3-5-2': { home: [
+    [3,1,'GK','GK'],[3,4,'','DEF'],[5,4,'','DEF'],[7,4,'','DEF'],
+    [1.5,6,'','MID'],[3,6.5,'','MID'],[5,7,'','MID'],[7,6.5,'','MID'],[8.5,6,'','MID'],
+    [3,8.5,'','FWD'],[7,8.5,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[3,7,'','DEF'],[5,7,'','DEF'],[7,7,'','DEF'],
+    [1.5,5,'','MID'],[3,4.5,'','MID'],[5,4,'','MID'],[7,4.5,'','MID'],[8.5,5,'','MID'],
+    [3,2.5,'','FWD'],[7,2.5,'','FWD']
+  ]},
+  '5-3-2': { home: [
+    [3,1,'GK','GK'],[1,4,'','DEF'],[3,4,'','DEF'],[5,4,'','DEF'],[7,4,'','DEF'],[9,4,'','DEF'],
+    [3,6.5,'','MID'],[5,6.5,'','MID'],[7,6.5,'','MID'],
+    [3,8.5,'','FWD'],[7,8.5,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[1,7,'','DEF'],[3,7,'','DEF'],[5,7,'','DEF'],[7,7,'','DEF'],[9,7,'','DEF'],
+    [3,4.5,'','MID'],[5,4.5,'','MID'],[7,4.5,'','MID'],
+    [3,2.5,'','FWD'],[7,2.5,'','FWD']
+  ]},
+  '4-1-4-1': { home: [
+    [3,1,'GK','GK'],[2,4,'','DEF'],[4,4,'','DEF'],[6,4,'','DEF'],[8,4,'','DEF'],
+    [5,5.5,'','MID'],
+    [2,7,'','MID'],[4,7,'','MID'],[6,7,'','MID'],[8,7,'','MID'],
+    [5,9,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[2,7,'','DEF'],[4,7,'','DEF'],[6,7,'','DEF'],[8,7,'','DEF'],
+    [5,5.5,'','MID'],
+    [2,4,'','MID'],[4,4,'','MID'],[6,4,'','MID'],[8,4,'','MID'],
+    [5,2,'','FWD']
+  ]},
+  '3-4-3': { home: [
+    [3,1,'GK','GK'],[3,4,'','DEF'],[5,4,'','DEF'],[7,4,'','DEF'],
+    [2,6,'','MID'],[4,6,'','MID'],[6,6,'','MID'],[8,6,'','MID'],
+    [2,8,'','FWD'],[5,9,'','FWD'],[8,8,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[3,7,'','DEF'],[5,7,'','DEF'],[7,7,'','DEF'],
+    [2,5,'','MID'],[4,5,'','MID'],[6,5,'','MID'],[8,5,'','MID'],
+    [2,3,'','FWD'],[5,2,'','FWD'],[8,3,'','FWD']
+  ]},
+  '4-3-2-1': { home: [
+    [3,1,'GK','GK'],[2,4,'','DEF'],[4,4,'','DEF'],[6,4,'','DEF'],[8,4,'','DEF'],
+    [3,6,'','MID'],[5,6,'','MID'],[7,6,'','MID'],
+    [3,8,'','FWD'],[7,8,'','FWD'],
+    [5,9.5,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[2,7,'','DEF'],[4,7,'','DEF'],[6,7,'','DEF'],[8,7,'','DEF'],
+    [3,5,'','MID'],[5,5,'','MID'],[7,5,'','MID'],
+    [3,3,'','FWD'],[7,3,'','FWD'],
+    [5,1.5,'','FWD']
+  ]},
+  '3-4-1-2': { home: [
+    [3,1,'GK','GK'],[3,4,'','DEF'],[5,4,'','DEF'],[7,4,'','DEF'],
+    [2,6,'','MID'],[4,6,'','MID'],[6,6,'','MID'],[8,6,'','MID'],
+    [5,8,'','FWD'],
+    [3,9.5,'','FWD'],[7,9.5,'','FWD']
+  ], away: [
+    [3,9,'GK','GK'],[3,7,'','DEF'],[5,7,'','DEF'],[7,7,'','DEF'],
+    [2,5,'','MID'],[4,5,'','MID'],[6,5,'','MID'],[8,5,'','MID'],
+    [5,3,'','FWD'],
+    [3,1.5,'','FWD'],[7,1.5,'','FWD']
+  ]},
+};
+
+function applyFormation(name) {
+  const f = FORMATIONS[name];
+  if (!f) return;
+  state.players = [];
+  const stepX = PITCH.w / 10;
+  const stepY = PITCH.h / 11;
+  let num = 1;
+  f.home.forEach(([gx, gy, pname, role]) => {
+    state.players.push(createPlayer('home', num++, pname, role, gx * stepX, gy * stepY));
+  });
+  num = 1;
+  f.away.forEach(([gx, gy, pname, role]) => {
+    state.players.push(createPlayer('away', num++, pname, role, gx * stepX, gy * stepY));
+  });
+  state.selectedPlayer = null;
+  pushHistory();
+  render();
+  updatePlayerList();
+}
+
+// ---- Drawing ----
+function getCanvasPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+  return { x, y };
+}
+
+function worldToCanvas(x, y) {
+  return { x: x * scale, y: y * scale };
+}
+
+function canvasToWorld(cx, cy) {
+  return { x: cx / scale, y: cy / scale };
+}
+
+function findPlayerAt(cx, cy) {
+  const r = 18 * scale;
+  for (let i = state.players.length - 1; i >= 0; i--) {
+    const p = state.players[i];
+    if (!p.visible) continue;
+    const wx = p.x * scale, wy = p.y * scale;
+    if (Math.abs(cx - wx) < r && Math.abs(cy - wy) < r) return i;
+  }
+  return -1;
+}
+
+let history = [];
+let historyIndex = -1;
+
+function pushHistory() {
+  const snap = JSON.parse(JSON.stringify({ players: state.players, drawings: state.drawings }));
+  if (historyIndex < history.length - 1) history = history.slice(0, historyIndex + 1);
+  history.push(snap);
+  if (history.length > 50) history.shift();
+  historyIndex = history.length - 1;
+  state.redoStack = [];
+}
+
+function undo() {
+  if (historyIndex <= 0) return;
+  historyIndex--;
+  const snap = history[historyIndex];
+  state.players = JSON.parse(JSON.stringify(snap.players));
+  state.drawings = JSON.parse(JSON.stringify(snap.drawings));
+  state.selectedPlayer = null;
+  render();
+  updatePlayerList();
+}
+
+function redo() {
+  if (historyIndex >= history.length - 1) return;
+  historyIndex++;
+  const snap = history[historyIndex];
+  state.players = JSON.parse(JSON.stringify(snap.players));
+  state.drawings = JSON.parse(JSON.stringify(snap.drawings));
+  state.selectedPlayer = null;
+  render();
+  updatePlayerList();
+}
+
+// ---- Render ----
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawPitch();
+  drawAllDrawings();
+  drawAllPlayers();
+  if (state.selectedPlayer !== null) drawSelectionHandle();
+}
+
+function drawAllPlayers() {
+  const r = 16 * scale;
+  state.players.forEach(p => {
+    if (!p.visible) return;
+    const x = p.x * scale, y = p.y * scale;
+    const color = p.team === 'home' ? state.homeColor : state.awayColor;
+
+    // Shadow
+    ctx.beginPath();
+    ctx.arc(x + 2, y + 2, r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fill();
+
+    // Body
+    const grd = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r);
+    grd.addColorStop(0, lightenColor(color, 40));
+    grd.addColorStop(1, color);
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Number
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${10 * scale}px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(p.number || '', x, y);
+
+    // Name label
+    ctx.fillStyle = '#fff';
+    ctx.font = `${9 * scale}px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(p.name || '', x, y + r + 4);
+  });
+}
+
+function drawSelectionHandle() {
+  const p = state.players[state.selectedPlayer];
+  if (!p) return;
+  const x = p.x * scale, y = p.y * scale;
+  const r = 18 * scale;
+  ctx.strokeStyle = '#ffdd00';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.arc(x, y, r + 4, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawAllDrawings() {
+  state.drawings.forEach(d => {
+    ctx.strokeStyle = d.color;
+    ctx.fillStyle = d.color;
+    ctx.lineWidth = d.width * scale;
+    ctx.globalAlpha = d.opacity || 1;
+
+    const pts = d.points.map(p => ({ x: p.x * scale, y: p.y * scale }));
+
+    switch (d.type) {
+      case 'pen': {
+        if (pts.length < 2) break;
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i].x, pts[i].y);
+        }
+        ctx.stroke();
+        break;
+      }
+      case 'line': {
+        if (pts.length < 2) break;
+        ctx.setLineDash(d.dashed ? [6 * scale, 4 * scale] : []);
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        break;
+      }
+      case 'arrow': {
+        if (pts.length < 2) break;
+        ctx.setLineDash(d.dashed ? [6 * scale, 4 * scale] : []);
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Arrowhead
+        const angle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
+        const headLen = 12 * scale;
+        ctx.beginPath();
+        ctx.moveTo(pts[1].x, pts[1].y);
+        ctx.lineTo(pts[1].x - headLen * Math.cos(angle - 0.4), pts[1].y - headLen * Math.sin(angle - 0.4));
+        ctx.lineTo(pts[1].x - headLen * Math.cos(angle + 0.4), pts[1].y - headLen * Math.sin(angle + 0.4));
+        ctx.closePath();
+        ctx.fill();
+        break;
+      }
+      case 'rect': {
+        if (pts.length < 2) break;
+        const x = Math.min(pts[0].x, pts[1].x);
+        const y = Math.min(pts[0].y, pts[1].y);
+        const w = Math.abs(pts[1].x - pts[0].x);
+        const h = Math.abs(pts[1].y - pts[0].y);
+        ctx.setLineDash(d.dashed ? [6 * scale, 4 * scale] : []);
+        ctx.strokeRect(x, y, w, h);
+        ctx.setLineDash([]);
+        if (d.fill) { ctx.globalAlpha = (d.opacity || 1) * 0.2; ctx.fillRect(x, y, w, h); }
+        break;
+      }
+      case 'circle': {
+        if (pts.length < 2) break;
+        const cx = (pts[0].x + pts[1].x) / 2;
+        const cy = (pts[0].y + pts[1].y) / 2;
+        const rx = Math.abs(pts[1].x - pts[0].x) / 2;
+        const ry = Math.abs(pts[1].y - pts[0].y) / 2;
+        ctx.setLineDash(d.dashed ? [6 * scale, 4 * scale] : []);
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (d.fill) { ctx.globalAlpha = (d.opacity || 1) * 0.2; ctx.fill(); }
+        break;
+      }
+    }
+    ctx.globalAlpha = 1;
+  });
+}
+
+function lightenColor(hex, amt) {
+  const c = parseInt(hex.replace('#',''), 16);
+  const r = Math.min(255, (c >> 16) + amt);
+  const g = Math.min(255, ((c >> 8) & 0xff) + amt);
+  const b = Math.min(255, (c & 0xff) + amt);
+  return `rgb(${r},${g},${b})`;
+}
+
+// ---- Interaction ----
+let drawingPoints = [];
+let tempDrawing = null;
+
+canvas.addEventListener('mousedown', e => {
+  const pos = getCanvasPos(e);
+  const wx = pos.x / scale, wy = pos.y / scale;
+
+  if (state.tool === 'select') {
+    const idx = findPlayerAt(pos.x, pos.y);
+    if (idx >= 0) {
+      state.selectedPlayer = idx;
+      state.dragPlayer = idx;
+      state.dragOffX = pos.x - state.players[idx].x * scale;
+      state.dragOffY = pos.y - state.players[idx].y * scale;
+      render();
+      updatePlayerList();
+      return;
+    }
+    state.selectedPlayer = null;
+    render();
+    updatePlayerList();
+    return;
+  }
+
+  if (state.tool === 'eraser') {
+    // Check drawings
+    let found = false;
+    const r = 10 * scale;
+    for (let i = state.drawings.length - 1; i >= 0; i--) {
+      const d = state.drawings[i];
+      const pts = d.points;
+      for (let j = 0; j < pts.length; j++) {
+        const dx = pos.x - pts[j].x * scale;
+        const dy = pos.y - pts[j].y * scale;
+        if (dx * dx + dy * dy < r * r) {
+          state.drawings.splice(i, 1);
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+    if (found) { pushHistory(); render(); }
+    return;
+  }
+
+  // Drawing tools
+  state.isDrawing = true;
+  state.drawStart = { x: wx, y: wy };
+  drawingPoints = [{ x: wx, y: wy }];
+
+  if (state.tool === 'pen') {
+    tempDrawing = { type: 'pen', color: state.drawColor, width: state.drawWidth, points: [{ x: wx, y: wy }], opacity: 1 };
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const pos = getCanvasPos(e);
+  const wx = pos.x / scale, wy = pos.y / scale;
+
+  // Update cursor
+  if (state.tool === 'select') {
+    const idx = findPlayerAt(pos.x, pos.y);
+    canvas.style.cursor = idx >= 0 ? 'grab' : 'default';
+  } else {
+    canvas.style.cursor = 'crosshair';
+  }
+
+  if (state.dragPlayer !== null) {
+    const p = state.players[state.dragPlayer];
+    if (p) {
+      p.x = Math.max(0, Math.min(PITCH.w, (pos.x - state.dragOffX) / scale));
+      p.y = Math.max(0, Math.min(PITCH.h, (pos.y - state.dragOffY) / scale));
+      render();
+      updatePlayerList();
+    }
+    return;
+  }
+
+  if (!state.isDrawing) return;
+
+  if (state.tool === 'pen') {
+    drawingPoints.push({ x: wx, y: wy });
+    if (tempDrawing) tempDrawing.points = [...drawingPoints];
+    render();
+    if (tempDrawing) {
+      const d = tempDrawing;
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = d.width * scale;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(d.points[0].x * scale, d.points[0].y * scale);
+      for (let i = 1; i < d.points.length; i++) {
+        ctx.lineTo(d.points[i].x * scale, d.points[i].y * scale);
+      }
+      ctx.stroke();
+    }
+    return;
+  }
+
+  // Preview for line/arrow/rect/circle
+  const sx = state.drawStart.x, sy = state.drawStart.y;
+  render();
+  const color = state.drawColor;
+  const w = state.drawWidth * scale;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = w;
+  ctx.globalAlpha = 1;
+
+  switch (state.tool) {
+    case 'line': {
+      ctx.beginPath();
+      ctx.moveTo(sx * scale, sy * scale);
+      ctx.lineTo(wx * scale, wy * scale);
+      ctx.stroke();
+      break;
+    }
+    case 'arrow': {
+      ctx.beginPath();
+      ctx.moveTo(sx * scale, sy * scale);
+      ctx.lineTo(wx * scale, wy * scale);
+      ctx.stroke();
+      const angle = Math.atan2(wy * scale - sy * scale, wx * scale - sx * scale);
+      const head = 12 * scale;
+      ctx.beginPath();
+      ctx.moveTo(wx * scale, wy * scale);
+      ctx.lineTo(wx * scale - head * Math.cos(angle - 0.4), wy * scale - head * Math.sin(angle - 0.4));
+      ctx.lineTo(wx * scale - head * Math.cos(angle + 0.4), wy * scale - head * Math.sin(angle + 0.4));
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'dashed': {
+      ctx.setLineDash([6 * scale, 4 * scale]);
+      ctx.beginPath();
+      ctx.moveTo(sx * scale, sy * scale);
+      ctx.lineTo(wx * scale, wy * scale);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      const angle = Math.atan2(wy * scale - sy * scale, wx * scale - sx * scale);
+      const head = 12 * scale;
+      ctx.beginPath();
+      ctx.moveTo(wx * scale, wy * scale);
+      ctx.lineTo(wx * scale - head * Math.cos(angle - 0.4), wy * scale - head * Math.sin(angle - 0.4));
+      ctx.lineTo(wx * scale - head * Math.cos(angle + 0.4), wy * scale - head * Math.sin(angle + 0.4));
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'rect': {
+      const rx = Math.min(sx, wx) * scale;
+      const ry = Math.min(sy, wy) * scale;
+      const rw = Math.abs(wx - sx) * scale;
+      const rh = Math.abs(wy - sy) * scale;
+      ctx.strokeRect(rx, ry, rw, rh);
+      break;
+    }
+    case 'circle': {
+      const cx = (sx + wx) / 2 * scale;
+      const cy = (sy + wy) / 2 * scale;
+      const rx = Math.abs(wx - sx) / 2 * scale;
+      const ry = Math.abs(wy - sy) / 2 * scale;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+  }
+});
+
+canvas.addEventListener('mouseup', e => {
+  const pos = getCanvasPos(e);
+  const wx = pos.x / scale, wy = pos.y / scale;
+
+  if (state.dragPlayer !== null) {
+    state.dragPlayer = null;
+    pushHistory();
+    return;
+  }
+
+  if (!state.isDrawing) return;
+  state.isDrawing = false;
+
+  const sx = state.drawStart.x, sy = state.drawStart.y;
+  let newDrawing = null;
+
+  switch (state.tool) {
+    case 'pen': {
+      if (drawingPoints.length > 1) {
+        newDrawing = { type: 'pen', color: state.drawColor, width: state.drawWidth, points: [...drawingPoints], opacity: 1 };
+        tempDrawing = null;
+      }
+      break;
+    }
+    case 'line':
+      newDrawing = { type: 'line', color: state.drawColor, width: state.drawWidth, points: [{ x: sx, y: sy }, { x: wx, y: wy }], dashed: false, opacity: 1 };
+      break;
+    case 'arrow':
+      newDrawing = { type: 'arrow', color: state.drawColor, width: state.drawWidth, points: [{ x: sx, y: sy }, { x: wx, y: wy }], dashed: false, opacity: 1 };
+      break;
+    case 'dashed':
+      newDrawing = { type: 'arrow', color: state.drawColor, width: state.drawWidth, points: [{ x: sx, y: sy }, { x: wx, y: wy }], dashed: true, opacity: 1 };
+      break;
+    case 'rect':
+      newDrawing = { type: 'rect', color: state.drawColor, width: state.drawWidth, points: [{ x: sx, y: sy }, { x: wx, y: wy }], dashed: false, fill: true, opacity: 1 };
+      break;
+    case 'circle':
+      newDrawing = { type: 'circle', color: state.drawColor, width: state.drawWidth, points: [{ x: sx, y: sy }, { x: wx, y: wy }], dashed: false, fill: true, opacity: 1 };
+      break;
+  }
+
+  if (newDrawing) {
+    state.drawings.push(newDrawing);
+    pushHistory();
+    render();
+  }
+});
+
+// Touch events
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const me = new MouseEvent('mousedown', { clientX: t.clientX, clientY: t.clientY });
+  canvas.dispatchEvent(me);
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const me = new MouseEvent('mousemove', { clientX: t.clientX, clientY: t.clientY });
+  canvas.dispatchEvent(me);
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  const me = new MouseEvent('mouseup', {});
+  canvas.dispatchEvent(me);
+}, { passive: false });
+
+// ---- UI ----
+function updatePlayerList() {
+  const list = document.getElementById('playerList');
+  list.innerHTML = '';
+  state.players.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'player-item' + (i === state.selectedPlayer ? ' active' : '');
+    const dot = document.createElement('div');
+    dot.className = 'player-dot';
+    dot.style.background = p.team === 'home' ? state.homeColor : state.awayColor;
+    dot.textContent = p.number || '-';
+    const label = document.createElement('span');
+    label.textContent = `${p.name || ''} (${p.role || ''})`;
+    label.style.flex = '1';
+    div.appendChild(dot);
+    div.appendChild(label);
+    div.addEventListener('click', () => {
+      state.selectedPlayer = i;
+      render();
+      updatePlayerList();
+      loadPlayerProps();
+    });
+    list.appendChild(div);
+  });
+}
+
+function loadPlayerProps() {
+  if (state.selectedPlayer === null) {
+    document.getElementById('playerName').value = '';
+    document.getElementById('playerNumber').value = '';
+    document.getElementById('playerTeam').value = 'home';
+    document.getElementById('playerRole').value = 'MID';
+    return;
+  }
+  const p = state.players[state.selectedPlayer];
+  document.getElementById('playerName').value = p.name || '';
+  document.getElementById('playerNumber').value = p.number || '';
+  document.getElementById('playerTeam').value = p.team;
+  document.getElementById('playerRole').value = p.role || 'MID';
+}
+
+// ---- Tool buttons ----
+document.querySelectorAll('.tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.id;
+    if (id === 'tool-undo') { undo(); return; }
+    if (id === 'tool-redo') { redo(); return; }
+    if (id === 'tool-clear') {
+      if (state.drawings.length === 0 && state.players.length === 0) return;
+      state.drawings = [];
+      render();
+      pushHistory();
+      return;
+    }
+    if (id === 'tool-export') {
+      const link = document.createElement('a');
+      link.download = 'tactics.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      return;
+    }
+    const map = {
+      'tool-select': 'select', 'tool-pen': 'pen', 'tool-line': 'line',
+      'tool-arrow': 'arrow', 'tool-dashed': 'dashed', 'tool-rect': 'rect',
+      'tool-circle': 'circle', 'tool-eraser': 'eraser'
+    };
+    if (map[id]) {
+      state.tool = map[id];
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      canvas.style.cursor = map[id] === 'select' ? 'default' : 'crosshair';
+    }
+  });
+});
+
+// Topbar controls
+document.getElementById('pitchView').addEventListener('change', e => {
+  state.pitchView = e.target.value;
+  resizeCanvas();
+});
+
+document.getElementById('drawColor').addEventListener('input', e => {
+  state.drawColor = e.target.value;
+});
+
+document.getElementById('drawWidth').addEventListener('input', e => {
+  state.drawWidth = parseFloat(e.target.value);
+  document.getElementById('widthLabel').textContent = e.target.value;
+});
+
+document.getElementById('homeColor').addEventListener('input', e => {
+  state.homeColor = e.target.value;
+  render();
+  updatePlayerList();
+});
+
+document.getElementById('awayColor').addEventListener('input', e => {
+  state.awayColor = e.target.value;
+  render();
+  updatePlayerList();
+});
+
+// Add/delete players
+document.getElementById('btnAddHome').addEventListener('click', () => {
+  const x = PITCH.w / 2 + (Math.random() - 0.5) * 100;
+  const y = PITCH.h / 2 + (Math.random() - 0.5) * 100;
+  state.players.push(createPlayer('home', state.players.filter(p => p.team === 'home').length + 1, '', 'MID', x, y));
+  pushHistory();
+  render();
+  updatePlayerList();
+});
+
+document.getElementById('btnAddAway').addEventListener('click', () => {
+  const x = PITCH.w / 2 + (Math.random() - 0.5) * 100;
+  const y = PITCH.h / 2 + (Math.random() - 0.5) * 100;
+  state.players.push(createPlayer('away', state.players.filter(p => p.team === 'away').length + 1, '', 'MID', x, y));
+  pushHistory();
+  render();
+  updatePlayerList();
+});
+
+document.getElementById('btnDeletePlayer').addEventListener('click', () => {
+  if (state.selectedPlayer === null) return;
+  state.players.splice(state.selectedPlayer, 1);
+  state.selectedPlayer = null;
+  pushHistory();
+  render();
+  updatePlayerList();
+});
+
+// Player properties
+document.getElementById('playerName').addEventListener('input', e => {
+  if (state.selectedPlayer === null) return;
+  state.players[state.selectedPlayer].name = e.target.value;
+  render();
+  updatePlayerList();
+});
+
+document.getElementById('playerNumber').addEventListener('input', e => {
+  if (state.selectedPlayer === null) return;
+  state.players[state.selectedPlayer].number = parseInt(e.target.value) || 0;
+  render();
+  updatePlayerList();
+});
+
+document.getElementById('playerTeam').addEventListener('change', e => {
+  if (state.selectedPlayer === null) return;
+  state.players[state.selectedPlayer].team = e.target.value;
+  render();
+  updatePlayerList();
+});
+
+document.getElementById('playerRole').addEventListener('change', e => {
+  if (state.selectedPlayer === null) return;
+  state.players[state.selectedPlayer].role = e.target.value;
+  render();
+  updatePlayerList();
+});
+
+// Formation buttons
+document.querySelectorAll('[data-formation]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    applyFormation(btn.dataset.formation);
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); return; }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); return; }
+  const keyMap = { 'v':'select', 'p':'pen', 'l':'line', 'a':'arrow', 'd':'dashed', 'r':'rect', 'c':'circle', 'e':'eraser' };
+  if (keyMap[e.key]) {
+    const id = 'tool-' + keyMap[e.key];
+    const btn = document.getElementById(id);
+    if (btn) btn.click();
+  }
+});
+
+// ---- Init ----
+resizeCanvas();
+applyFormation('4-3-3');
+</script>
+</body>
+</html>

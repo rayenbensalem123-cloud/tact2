@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<title>TacticalPad</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+  <!-- Context Menu -->
+  <div id="contextMenu" class="context-menu">
+    <div class="ctx-item" data-action="duplicate">Duplicate</div>
+    <div class="ctx-item" data-action="delete">Delete</div>
+    <div class="ctx-item" data-action="reset-pos">Reset Position</div>
+  </div>
+
+  <!-- Text entry dialog -->
+  <div id="textDialog" class="text-dialog-overlay" style="display:none">
+    <div class="text-dialog-box">
+      <div class="text-dialog-header">Enter Text</div>
+      <input id="textDialogInput" type="text" class="text-dialog-input" placeholder="Type your text..." autofocus>
+      <div class="text-dialog-size">
+        <label>Size:</label>
+        <input type="range" id="textDialogSize" min="8" max="72" value="28" step="1">
+        <span id="textDialogSizeLabel">28</span>
+      </div>
+      <div class="text-dialog-buttons">
+        <button id="textDialogOk" class="btn">OK</button>
+        <button id="textDialogCancel" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Left Toolbar -->
+  <div class="toolbar" id="toolbar">
+    <div class="tool-group">
+      <button class="tool-btn active" data-tool="select" title="Select (V)"><svg viewBox="0 0 24 24"><path d="M4 3l13 11-7 2-3 7z"/></svg></button>
+      <button class="tool-btn" data-tool="pen" title="Pen (P)"><svg viewBox="0 0 24 24"><path d="M3 17v4h4l11-11-4-4L3 17zm14-14l4 4-2 2-4-4 2-2z"/></svg></button>
+      <button class="tool-btn" data-tool="line" title="Line (L)"><svg viewBox="0 0 24 24"><path d="M4 20L20 4"/></svg></button>
+      <button class="tool-btn" data-tool="arrow" title="Arrow (A)"><svg viewBox="0 0 24 24"><path d="M4 12h12l-4-4m4 4l-4 4"/></svg></button>
+      <button class="tool-btn" data-tool="dashed" title="Dashed Arrow (D)"><svg viewBox="0 0 24 24"><path d="M4 12h3m4 0h3m4 0h3"/></svg></button>
+      <button class="tool-btn" data-tool="rect" title="Rectangle (R)"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg></button>
+      <button class="tool-btn" data-tool="circle" title="Circle (C)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></button>
+      <button class="tool-btn" data-tool="text" title="Text (T)"><svg viewBox="0 0 24 24"><path d="M5 4h14v3H5zm3 7h8v2H8zm-2 4h12v2H6z"/></svg></button>
+    </div>
+    <div class="tool-sep"></div>
+    <div class="tool-group">
+      <button class="tool-btn" data-tool="eraser" title="Eraser (E)"><svg viewBox="0 0 24 24"><path d="M16 3L3 16l5 5 13-13-5-5z"/></svg></button>
+      <button class="tool-btn" data-tool="triangle" title="Triangle"><svg viewBox="0 0 24 24"><polygon points="12,3 21,20 3,20" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+      <button class="tool-btn" data-tool="connector" title="Connector"><svg viewBox="0 0 24 24"><polyline points="3,6 10,12 17,8 21,16" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+      <button class="tool-btn" id="btnUndo" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M12 5c-4 0-7 2-9 5l-2-2v6h6l-2-2c2-2 4-3 7-3 4 0 7 3 7 7h2c0-5-4-9-9-9z"/></svg></button>
+      <button class="tool-btn" id="btnRedo" title="Redo (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M12 5c5 0 9 4 9 9h-2c0-4-3-7-7-7-3 0-5 1-7 3l2 2H1V6l2 2c2-3 5-5 9-5z"/></svg></button>
+    </div>
+    <div class="tool-sep"></div>
+    <div class="tool-group">
+      <button class="tool-btn" id="btnClearAll" title="Clear All"><svg viewBox="0 0 24 24"><path d="M19 4h-4l-1-1H9L8 4H4v2h15M5 19c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7H5v12z"/></svg></button>
+      <button class="tool-btn" id="btnPrint" title="Print (Ctrl+P)"><svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></button>
+      <button class="tool-btn" id="btnExport" title="Export PNG (Ctrl+E)"><svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6-7l-4 4h3v6h2V9h3l-4-4z"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Main content area -->
+  <div class="main-area">
+    <!-- Top bar -->
+    <div class="topbar" id="topbar">
+      <div class="topbar-left">
+        <label>View:</label>
+        <select id="pitchView">
+          <option value="full">Full</option>
+          <option value="half">Half Att</option>
+          <option value="half-def">Half Def</option>
+        </select>
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-left">
+        <label>Color:</label>
+        <input type="color" id="drawColor" value="#ffdd00">
+        <label style="margin-left:6px">Width:</label>
+        <input type="range" id="drawWidth" min="1" max="8" value="2" step="0.5">
+        <span id="widthLabel">2</span>
+        <label style="margin-left:6px">Opacity:</label>
+        <input type="range" id="drawOpacity" min="10" max="100" value="100" style="width:50px">
+        <span id="opacityLabel">100%</span>
+        <label style="margin-left:6px">Text Size:</label>
+        <input type="range" id="textSize" min="8" max="72" value="28" step="1" style="width:60px">
+        <span id="textSizeLabel">28</span>
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-left">
+        <label>Line:</label>
+        <select id="lineStyle">
+          <option value="solid">Solid</option>
+          <option value="dashed">Dashed</option>
+          <option value="dotted">Dotted</option>
+        </select>
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-left">
+        <label>Home:</label>
+        <input type="color" id="homeColor" value="#e94560">
+        <label style="margin-left:6px">Away:</label>
+        <input type="color" id="awayColor" value="#4a9eff">
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-left">
+        <button id="btnAddHome">+ Home</button>
+        <button id="btnAddAway">+ Away</button>
+        <button id="btnDeletePlayer">Delete</button>
+        <button id="btnDuplicate">Duplicate</button>
+      </div>
+      <div class="topbar-right">
+        <label class="toggle-label">
+          <input type="checkbox" id="chkGrid"> Grid
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="chkSnap"> Snap
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="chkLabels" checked> Names
+        </label>
+        <span id="zoomLabel" class="zoom-label">100%</span>
+        <button class="panel-toggle" id="btnTogglePanel" title="Toggle Panel">📋</button>
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="pitchCanvas"></canvas>
+      <button class="tablet-reset-btn" id="btnResetView" title="Reset zoom and position">⟲ Reset</button>
+      <button class="tablet-reset-btn" id="btnFullscreen" title="Fullscreen">⛶ Full</button>
+      <button class="tablet-reset-btn" id="btnLockView" title="Lock pitch view">🔓 Lock</button>
+      <button class="tablet-reset-btn" id="btnClearCanvas" title="Clear everything">🗑 Clear</button>
+      <div id="statusBar" class="status-bar">
+        <span id="statusTool">Select</span>
+        <span id="statusCoords">0, 0</span>
+        <span id="statusPlayers">0 players</span>
+        <span id="statusEquipment">0 items</span>
+        <span id="statusFile">Untitled</span>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-bar" id="timelineBar">
+      <div class="tl-section">
+        <button class="tl-btn" id="tlPlay" title="Play">▶</button>
+        <button class="tl-btn" id="tlStop" title="Stop">■</button>
+      </div>
+      <div class="tl-section">
+        <button class="tl-btn" id="tlAddKey" title="Add Keyframe">+Key</button>
+        <button class="tl-btn" id="tlClearKeys" title="Clear All Keyframes">✕</button>
+      </div>
+      <div class="tl-track-wrap">
+        <div class="tl-track" id="tlTrack">
+          <div class="tl-playhead" id="tlPlayhead"></div>
+        </div>
+      </div>
+      <div class="tl-section">
+        <span class="tl-time" id="tlTime">0.0s</span>
+      </div>
+      <div class="tl-section">
+        <label class="tl-label">Speed:</label>
+        <select id="tlSpeed" class="tl-select">
+          <option value="0.25">0.25x</option>
+          <option value="0.5">0.5x</option>
+          <option value="1" selected>1x</option>
+          <option value="2">2x</option>
+        </select>
+      </div>
+      <div class="tl-section">
+        <label class="tl-label">
+          <input type="checkbox" id="tlLoop"> Loop
+        </label>
+      </div>
+      <div style="font-size:10px;color:#556;padding:0 6px;white-space:nowrap">
+        <span id="tlKeyCount">0</span> keys
+      </div>
+      <div class="tl-section">
+        <button class="tl-btn" id="btnExportVideo" title="Export animation as video or GIF">Export</button>
+        <select id="exportFormat" class="tl-select">
+          <option value="webm">WebM</option>
+          <option value="gif">GIF</option>
+        </select>
+        <select id="exportFps" class="tl-select" style="width:48px">
+          <option value="10">10fps</option>
+          <option value="15">15fps</option>
+          <option value="30" selected>30fps</option>
+          <option value="60">60fps</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="panel" id="panel">
+    <div class="panel-section">
+      <h3 class="panel-title">Formations</h3>
+      <div class="formation-grid">
+        <button class="btn" data-formation="4-3-3">4-3-3</button>
+        <button class="btn" data-formation="4-4-2">4-4-2</button>
+        <button class="btn" data-formation="4-2-3-1">4-2-3-1</button>
+        <button class="btn" data-formation="3-5-2">3-5-2</button>
+        <button class="btn" data-formation="5-3-2">5-3-2</button>
+        <button class="btn" data-formation="4-1-4-1">4-1-4-1</button>
+        <button class="btn" data-formation="3-4-3">3-4-3</button>
+        <button class="btn" data-formation="4-3-2-1">4-3-2-1</button>
+        <button class="btn" data-formation="3-4-1-2">3-4-1-2</button>
+      </div>
+    </div>
+
+    <div class="panel-sep"></div>
+
+    <div class="panel-section">
+      <h3 class="panel-title">Pitch Style</h3>
+      <label>Grass</label>
+      <select id="pitchStyle">
+        <option value="green">Green</option>
+        <option value="dark">Dark Green</option>
+        <option value="dry">Dry / Yellow</option>
+        <option value="gray">Gray / Training</option>
+      </select>
+      <label>Line Color</label>
+      <input type="color" id="pitchLineColor" value="#ffffff">
+      <label>Show Bench</label>
+      <label class="toggle-label" style="margin-bottom:5px">
+        <input type="checkbox" id="chkBench" checked> Bench Area
+      </label>
+    </div>
+
+    <div class="panel-sep"></div>
+
+    <div class="panel-section">
+      <h3 class="panel-title">Equipment</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px;margin-bottom:4px">
+        <button class="btn eq-btn" data-eq="cone" title="Cone">
+          <svg viewBox="0 0 24 24"><path d="M12 2 L6 22 L18 22 Z" fill="#ff6600" stroke="#cc4400" stroke-width="1"/><path d="M9 15 L10 10" stroke="#fff" stroke-width="2"/><path d="M15 15 L14 10" stroke="#fff" stroke-width="2"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="ball" title="Ball">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fff" stroke="#555" stroke-width="1"/><polygon points="12,5 14,9 18,9 15,12 16,16 12,13.5 8,16 9,12 6,9 10,9" fill="#444"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="mannequin" title="Mannequin">
+          <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="0.5" fill="none" stroke="#e94560" stroke-width="1.8"/><polyline points="6,7 7,6 9,6" fill="none" stroke="#e94560" stroke-width="1.8"/><polyline points="18,7 17,6 15,6" fill="none" stroke="#e94560" stroke-width="1.8"/><line x1="7" y1="6" x2="5" y2="15" stroke="#e94560" stroke-width="1.8"/><line x1="17" y1="6" x2="19" y2="15" stroke="#e94560" stroke-width="1.8"/><line x1="5" y1="15" x2="19" y2="15" stroke="#e94560" stroke-width="2.2"/><line x1="8" y1="10" x2="16" y2="10" stroke="#e94560" stroke-width="2.5"/><circle cx="12" cy="10" r="2.2" fill="none" stroke="#e94560" stroke-width="1.6"/><line x1="10" y1="15" x2="10" y2="22" stroke="#e94560" stroke-width="2"/><line x1="14" y1="15" x2="14" y2="22" stroke="#e94560" stroke-width="2"/><line x1="6" y1="22" x2="18" y2="22" stroke="#e94560" stroke-width="2.5"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="hurdle" title="Hurdle">
+          <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="3" rx="1" fill="#ff4444"/><path d="M5 8 L3 16" stroke="#ff4444" stroke-width="2.5"/><path d="M19 8 L21 16" stroke="#ff4444" stroke-width="2.5"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="ladder" title="Ladder">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M4,8 H20 M4,12 H20 M4,16 H20" stroke="#fff" stroke-width="1.5"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="flag" title="Flag">
+          <svg viewBox="0 0 24 24"><line x1="6" y1="2" x2="6" y2="22" stroke="#888" stroke-width="2"/><polygon points="6,2 22,8 6,14" fill="#ffdd00" stroke="#cc9900" stroke-width="0.8"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="ring" title="Ring">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#4a9eff" stroke-width="4"/><circle cx="11" cy="11" r="6" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="pole" title="Pole">
+          <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="18" rx="2" fill="#ccc" stroke="#999" stroke-width="1"/><ellipse cx="12" cy="20" rx="8" ry="3" fill="#888" stroke="#666" stroke-width="0.8"/><circle cx="12" cy="2" r="4" fill="#aaa" stroke="#999" stroke-width="1"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="leader" title="Arrow">
+          <svg viewBox="0 0 24 24"><polygon points="4,12 10,6 10,10 20,10 20,14 10,14 10,18" fill="#ffdd00" stroke="#cc9900" stroke-width="1.5"/></svg>
+        </button>
+        <button class="btn eq-btn" data-eq="plot" title="Plot">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#ff4444"/><circle cx="12" cy="12" r="7" fill="none" stroke="#aa1818" stroke-width="1.2"/><circle cx="12" cy="12" r="2" fill="#991515"/></svg>
+        </button>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
+        <label style="font-size:10px;color:#ccc">Size</label>
+        <input type="range" id="equipSize" min="0.25" max="3" step="0.25" value="1" style="flex:1">
+        <span id="equipSizeVal" style="font-size:10px;color:#ccc;min-width:20px">1</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+        <label style="font-size:10px;color:#ccc">Rot</label>
+        <input type="range" id="equipRot" min="0" max="360" step="1" value="0" style="flex:1">
+        <span id="equipRotVal" style="font-size:10px;color:#ccc;min-width:28px;text-align:right">0°</span>
+      </div>
+      <div id="equipList" class="player-list" style="max-height:100px"></div>
+    </div>
+
+    <div class="panel-sep"></div>
+
+    <div class="panel-section">
+      <h3 class="panel-title">Connections <span class="badge" id="connCount">0</span></h3>
+      <div id="connList" class="player-list" style="max-height:80px"></div>
+    </div>
+
+    <div class="panel-sep"></div>
+
+    <div class="panel-section">
+      <h3 class="panel-title">Players <span class="badge" id="playerCount">0</span></h3>
+      <div class="player-search">
+        <input type="text" id="playerSearch" placeholder="Search..." style="width:100%">
+      </div>
+      <div class="player-list" id="playerList"></div>
+    </div>
+
+    <div class="panel-sep"></div>
+
+    <div class="panel-section" id="playerProps">
+      <h3 class="panel-title">Properties</h3>
+      <label>Name</label>
+      <input type="text" id="playerName" placeholder="Player name">
+      <label>Number</label>
+      <input type="number" id="playerNumber" min="0" max="99" value="1">
+      <label>Team</label>
+      <select id="playerTeam"><option value="home">Home</option><option value="away">Away</option></select>
+      <label>Role</label>
+      <select id="playerRole"><option value="GK">Goalkeeper</option><option value="DEF">Defender</option><option value="MID">Midfielder</option><option value="FWD">Forward</option></select>
+      <div class="face-section" id="faceSection" style="display:none">
+        <label>Face</label>
+        <div style="display:flex;gap:4px;margin-bottom:4px">
+          <button class="btn" id="btnUploadFace" style="flex:1">Upload</button>
+          <button class="btn" id="btnRemoveFace" style="flex:1">Remove</button>
+        </div>
+        <input type="file" id="faceFileInput" accept="image/*" style="display:none">
+        <label>Zoom</label>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="range" id="faceZoom" min="0.5" max="2.5" step="0.05" value="1" style="flex:1">
+          <span id="faceZoomLabel" style="min-width:32px;text-align:right">1.0</span>
+        </div>
+        <label>Offset X</label>
+        <input type="range" id="faceOffsetX" min="-1" max="1" step="0.05" value="0" style="width:100%">
+        <label>Offset Y</label>
+        <input type="range" id="faceOffsetY" min="-1" max="1" step="0.05" value="0" style="width:100%">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/formations.js"></script>
+<script src="js/history.js"></script>
+<script src="js/pitch.js"></script>
+<script src="js/players.js"></script>
+<script src="js/drawings.js"></script>
+<script src="js/equipment.js"></script>
+<script src="js/gif-encoder.js"></script>
+<script src="js/animation.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

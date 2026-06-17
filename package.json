@@ -1,0 +1,45 @@
+{
+  "name": "tacticalpad",
+  "version": "1.0.0",
+  "description": "Professional Soccer Tactics Board - Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "build": {
+    "appId": "com.tacticalpad.app",
+    "productName": "TacticalPad",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.3.0",
+    "electron-builder": "^25.0.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.9"
+  }
+}

@@ -541,9 +541,8 @@ let touchDragIdx = -1;
 
 function isOverlayBtn(el) {
   while (el) {
-    if (el.classList && (el.classList.contains('tablet-reset-btn') || el.classList.contains('toolbar') || el.classList.contains('topbar'))) return true;
-    if (el.classList && el.classList.contains('fs-overlay-toolbar')) return true;
-    if (el.classList && el.classList.contains('fs-overlay-topbar')) return true;
+    if (el.classList && (el.classList.contains('tablet-reset-btn') || el.classList.contains('toolbar') || el.classList.contains('topbar') || el.classList.contains('panel'))) return true;
+    if (el.classList && (el.classList.contains('fs-overlay-toolbar') || el.classList.contains('fs-overlay-topbar') || el.classList.contains('fs-overlay-panel'))) return true;
     el = el.parentElement;
   }
   return false;

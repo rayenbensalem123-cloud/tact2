@@ -1476,11 +1476,14 @@ document.addEventListener('fullscreenchange', onFullscreenChange);
 document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
 // Block browser touch defaults in fullscreen to prevent page sliding
-document.addEventListener('touchstart', e => {
+function onFullscreenTouch(e) {
   if (document.fullscreenElement || document.webkitFullscreenElement) {
     if (!isOverlayBtn(e.target)) e.preventDefault();
   }
-}, { passive: false });
+}
+document.addEventListener('touchstart', onFullscreenTouch, { passive: false, capture: true });
+document.addEventListener('touchmove', onFullscreenTouch, { passive: false, capture: true });
+document.addEventListener('touchend', onFullscreenTouch, { passive: false, capture: true });
 
 document.querySelectorAll('.eq-btn[data-eq]').forEach(btn => {
   btn.addEventListener('click', () => {

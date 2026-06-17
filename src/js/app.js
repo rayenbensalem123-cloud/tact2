@@ -1479,6 +1479,14 @@ function onFullscreenChange() {
     document.documentElement.style.width = '100%';
     document.documentElement.style.height = '100%';
     document.documentElement.style.overflow = 'hidden';
+    canvas.style.touchAction = 'none';
+    // Retry the body fix after a frame in case browser resets it
+    requestAnimationFrame(() => {
+      document.body.style.position = 'fixed';
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.position = 'fixed';
+      document.documentElement.style.overflow = 'hidden';
+    });
   } else {
     document.body.style.position = '';
     document.body.style.width = '';
@@ -1488,6 +1496,7 @@ function onFullscreenChange() {
     document.documentElement.style.width = '';
     document.documentElement.style.height = '';
     document.documentElement.style.overflow = '';
+    canvas.style.touchAction = '';
   }
   resizeCanvas();
 }
@@ -1503,6 +1512,10 @@ function onFullscreenTouch(e) {
 document.addEventListener('touchstart', onFullscreenTouch, { passive: false, capture: true });
 document.addEventListener('touchmove', onFullscreenTouch, { passive: false, capture: true });
 document.addEventListener('touchend', onFullscreenTouch, { passive: false, capture: true });
+document.addEventListener('touchcancel', onFullscreenTouch, { passive: false, capture: true });
+document.addEventListener('gesturestart', onFullscreenTouch, { passive: false, capture: true });
+document.addEventListener('gesturechange', onFullscreenTouch, { passive: false, capture: true });
+document.addEventListener('gestureend', onFullscreenTouch, { passive: false, capture: true });
 
 document.querySelectorAll('.eq-btn[data-eq]').forEach(btn => {
   btn.addEventListener('click', () => {

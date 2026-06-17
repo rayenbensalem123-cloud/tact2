@@ -613,6 +613,7 @@ canvas.addEventListener('touchstart', e => { try {
         players.selectedIndices.clear();
         equipment.selectedIndices.clear();
         players.selected = null;
+        if (document.fullscreenElement || document.webkitFullscreenElement) toggleFsOverlays();
       }
     }
     updateUI(); render();
@@ -1476,57 +1477,46 @@ document.getElementById('btnFullscreen').addEventListener('click', () => {
   }
 });
 
-// ---- Fullscreen overlay toolbar (auto-hide) ----
-let fsHideTimer = null;
+// ---- Fullscreen overlay toolbar (toggle on tap) ----
 let fsRestore = null;
 
-function showFsOverlays() {
-  document.querySelectorAll('.fs-overlay-toolbar, .fs-overlay-topbar').forEach(el => el.classList.remove('fs-hidden'));
-}
-function hideFsOverlays() {
-  document.querySelectorAll('.fs-overlay-toolbar, .fs-overlay-topbar').forEach(el => el.classList.add('fs-hidden'));
-}
-function resetFsHideTimer() {
-  showFsOverlays();
-  if (fsHideTimer) clearTimeout(fsHideTimer);
-  fsHideTimer = setTimeout(hideFsOverlays, 3000);
+function toggleFsOverlays() {
+  const els = document.querySelectorAll('.fs-overlay-toolbar, .fs-overlay-topbar, .fs-overlay-panel');
+  const hidden = els.length > 0 && els[0].classList.contains('fs-hidden');
+  els.forEach(el => el.classList.toggle('fs-hidden', !hidden));
 }
 
 function setupFsToolbars() {
   const wrap = document.getElementById('canvasWrap');
   const toolbar = document.querySelector('.toolbar');
   const topbar = document.querySelector('.topbar');
+  const panel = document.querySelector('.panel');
   if (fsRestore) return;
   fsRestore = {
-    toolbarParent: toolbar.parentNode,
-    toolbarNext: toolbar.nextSibling,
-    topbarParent: topbar.parentNode,
-    topbarNext: topbar.nextSibling
+    toolbarParent: toolbar.parentNode, toolbarNext: toolbar.nextSibling,
+    topbarParent: topbar.parentNode, topbarNext: topbar.nextSibling,
+    panelParent: panel.parentNode, panelNext: panel.nextSibling
   };
   wrap.appendChild(toolbar);
   wrap.appendChild(topbar);
+  wrap.appendChild(panel);
   toolbar.classList.add('fs-overlay-toolbar');
   topbar.classList.add('fs-overlay-topbar');
-  // Show initially, auto-hide after 3s
-  resetFsHideTimer();
-  // Listen for any interaction inside canvasWrap to reset hide timer
-  wrap.addEventListener('touchstart', resetFsHideTimer, { passive: true });
-  wrap.addEventListener('mousedown', resetFsHideTimer, { passive: true });
+  panel.classList.add('fs-overlay-panel');
 }
 
 function teardownFsToolbars() {
   if (!fsRestore) return;
-  const wrap = document.getElementById('canvasWrap');
   const toolbar = document.querySelector('.toolbar');
   const topbar = document.querySelector('.topbar');
+  const panel = document.querySelector('.panel');
   toolbar.classList.remove('fs-overlay-toolbar');
   topbar.classList.remove('fs-overlay-topbar');
+  panel.classList.remove('fs-overlay-panel');
   fsRestore.toolbarParent.insertBefore(toolbar, fsRestore.toolbarNext);
   fsRestore.topbarParent.insertBefore(topbar, fsRestore.topbarNext);
+  fsRestore.panelParent.insertBefore(panel, fsRestore.panelNext);
   fsRestore = null;
-  if (fsHideTimer) { clearTimeout(fsHideTimer); fsHideTimer = null; }
-  wrap.removeEventListener('touchstart', resetFsHideTimer);
-  wrap.removeEventListener('mousedown', resetFsHideTimer);
 }
 
 function onFullscreenChange() {

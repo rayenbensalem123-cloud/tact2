@@ -534,6 +534,16 @@ body {
 #canvasWrap:-webkit-full-screen .tablet-reset-btn { z-index: 26; }
 #canvasWrap:fullscreen .status-bar,
 #canvasWrap:-webkit-full-screen .status-bar { display: none; }
+/* Overlay right panel */
+.fs-overlay-panel {
+  position: absolute; top: 60px; right: 6px; bottom: 6px; z-index: 24;
+  width: 220px; border-radius: 8px;
+  background: rgba(10,10,30,0.88); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.1); padding: 8px;
+  overflow-y: auto;
+  opacity: 1; transition: opacity 0.3s ease;
+}
+.fs-overlay-panel.fs-hidden { opacity: 0; pointer-events: none; }
 @media (max-width: 768px) {
   .topbar .toggle-label { font-size: 7px; }
   #widthLabel, #opacityLabel, #textSizeLabel { min-width: auto; }

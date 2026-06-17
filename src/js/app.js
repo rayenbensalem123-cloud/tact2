@@ -1470,6 +1470,25 @@ document.getElementById('btnFullscreen').addEventListener('click', () => {
 function onFullscreenChange() {
   const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
   document.getElementById('btnFullscreen').textContent = isFS ? '✕ Exit' : '⛶ Full';
+  if (isFS) {
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.position = 'fixed';
+    document.documentElement.style.width = '100%';
+    document.documentElement.style.height = '100%';
+    document.documentElement.style.overflow = 'hidden';
+  } else {
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.height = '';
+    document.body.style.overflow = '';
+    document.documentElement.style.position = '';
+    document.documentElement.style.width = '';
+    document.documentElement.style.height = '';
+    document.documentElement.style.overflow = '';
+  }
   resizeCanvas();
 }
 document.addEventListener('fullscreenchange', onFullscreenChange);

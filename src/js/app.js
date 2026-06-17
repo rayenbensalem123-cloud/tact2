@@ -519,7 +519,12 @@ canvas.addEventListener('mouseup', e => {
 });
 
 // ---- Zoom ----
+let touchActive = false;
+document.addEventListener('touchstart', () => { touchActive = true; }, { capture: true });
+document.addEventListener('touchend', () => { touchActive = false; }, { capture: true });
+document.addEventListener('touchcancel', () => { touchActive = false; }, { capture: true });
 canvas.addEventListener('wheel', e => {
+  if (touchActive) return; // ignore wheel generated from touch momentum
   e.preventDefault();
   if (viewLocked) return;
   const delta = e.deltaY > 0 ? -0.1 : 0.1;
@@ -1516,6 +1521,11 @@ document.addEventListener('touchcancel', onFullscreenTouch, { passive: false, ca
 document.addEventListener('gesturestart', onFullscreenTouch, { passive: false, capture: true });
 document.addEventListener('gesturechange', onFullscreenTouch, { passive: false, capture: true });
 document.addEventListener('gestureend', onFullscreenTouch, { passive: false, capture: true });
+// Also catch on window for iOS rubber-band prevention
+window.addEventListener('touchstart', onFullscreenTouch, { passive: false, capture: true });
+window.addEventListener('touchmove', onFullscreenTouch, { passive: false, capture: true });
+window.addEventListener('touchend', onFullscreenTouch, { passive: false, capture: true });
+window.addEventListener('touchcancel', onFullscreenTouch, { passive: false, capture: true });
 
 document.querySelectorAll('.eq-btn[data-eq]').forEach(btn => {
   btn.addEventListener('click', () => {

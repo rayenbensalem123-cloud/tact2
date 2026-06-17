@@ -1386,6 +1386,7 @@ document.getElementById('btnDeletePlayer').addEventListener('click', deleteSelec
 document.getElementById('btnDuplicate').addEventListener('click', duplicateSelection);
 
 let viewLocked = false;
+let fullscreenManualExit = false;
 document.getElementById('btnLockView').addEventListener('click', () => {
   viewLocked = !viewLocked;
   document.getElementById('btnLockView').textContent = viewLocked ? '🔒 Locked' : '🔓 Lock';
@@ -1467,6 +1468,7 @@ document.getElementById('btnFullscreen').addEventListener('click', () => {
     const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
     fn.call(wrap).catch(() => {});
   } else {
+    fullscreenManualExit = true;
     const fn = document.exitFullscreen || document.webkitExitFullscreen;
     fn.call(document).catch(() => {});
   }
@@ -1475,6 +1477,16 @@ document.getElementById('btnFullscreen').addEventListener('click', () => {
 function onFullscreenChange() {
   const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
   document.getElementById('btnFullscreen').textContent = isFS ? '✕ Exit' : '⛶ Full';
+  // When view is locked, auto-re-enter fullscreen if the user was kicked out
+  // by iPadOS system gestures (swipe down for Notification Center).
+  if (!isFS && viewLocked && !fullscreenManualExit) {
+    setTimeout(() => {
+      const wrap = document.getElementById('canvasWrap');
+      const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+      fn.call(wrap).catch(() => {});
+    }, 600);
+  }
+  fullscreenManualExit = false;
   if (isFS) {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';

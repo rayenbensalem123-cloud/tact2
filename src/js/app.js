@@ -547,7 +547,7 @@ function isOverlayBtn(el) {
   return false;
 }
 
-canvas.addEventListener('touchstart', e => {
+canvas.addEventListener('touchstart', e => { try {
   if (isOverlayBtn(e.target)) return;
   if (e.touches.length === 2) {
     if (!viewLocked) {
@@ -563,7 +563,7 @@ canvas.addEventListener('touchstart', e => {
     e.preventDefault();
     return;
   }
-  if (pinchActive) return;
+  if (pinchActive) { pinchActive = false; pinchCenter = null; e.preventDefault(); return; }
   e.preventDefault();
   const t = e.touches[0];
   const dev = getDevCoords({ clientX: t.clientX, clientY: t.clientY });
@@ -649,9 +649,9 @@ canvas.addEventListener('touchstart', e => {
     }
     render();
   }
-}, { passive: false });
+} catch(_){} }, { passive: false });
 
-canvas.addEventListener('touchmove', e => {
+canvas.addEventListener('touchmove', e => { try {
   if (isOverlayBtn(e.target)) return;
   if (e.touches.length === 2) {
     e.preventDefault();
@@ -673,7 +673,7 @@ canvas.addEventListener('touchmove', e => {
     resizeCanvas();
     return;
   }
-  if (pinchActive) return;
+  if (pinchActive) { e.preventDefault(); return; }
   e.preventDefault();
   const t = e.touches[0];
   const dev = getDevCoords({ clientX: t.clientX, clientY: t.clientY });
@@ -724,9 +724,9 @@ canvas.addEventListener('touchmove', e => {
       ctx.restore();
     }
   }
-}, { passive: false });
+} catch(_){} }, { passive: false });
 
-canvas.addEventListener('touchend', e => {
+canvas.addEventListener('touchend', e => { try {
   if (isOverlayBtn(e.target)) return;
   if (pinchActive) { pinchActive = false; pinchCenter = null; return; }
   if (touchDragIdx >= 0) {
@@ -748,7 +748,7 @@ canvas.addEventListener('touchend', e => {
     markDirty(); history.push(players.players, drawings.drawings, equipment.items, connections);
     render();
   }
-}, { passive: false });
+} catch(_){} }, { passive: false });
 
 // ---- Keyboard ----
 document.addEventListener('keydown', e => {

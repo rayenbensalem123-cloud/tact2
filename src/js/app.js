@@ -1564,11 +1564,6 @@ function onFullscreenTouch(e) {
     if (!isOverlayBtn(e.target)) e.preventDefault();
   }
 }
-function onFullscreenMouse(e) {
-  if (document.fullscreenElement || document.webkitFullscreenElement) {
-    if (!isOverlayBtn(e.target)) e.preventDefault();
-  }
-}
 document.addEventListener('touchstart', onFullscreenTouch, { passive: false, capture: true });
 document.addEventListener('touchmove', onFullscreenTouch, { passive: false, capture: true });
 document.addEventListener('touchend', onFullscreenTouch, { passive: false, capture: true });
@@ -1581,10 +1576,7 @@ window.addEventListener('touchstart', onFullscreenTouch, { passive: false, captu
 window.addEventListener('touchmove', onFullscreenTouch, { passive: false, capture: true });
 window.addEventListener('touchend', onFullscreenTouch, { passive: false, capture: true });
 window.addEventListener('touchcancel', onFullscreenTouch, { passive: false, capture: true });
-// Kill synthesized mouse events during fullscreen (iPad sends both touch and mouse)
-window.addEventListener('mousedown', onFullscreenMouse, { capture: true });
-window.addEventListener('mousemove', onFullscreenMouse, { capture: true });
-window.addEventListener('mouseup', onFullscreenMouse, { capture: true });
+
 
 document.querySelectorAll('.eq-btn[data-eq]').forEach(btn => {
   btn.addEventListener('click', () => {

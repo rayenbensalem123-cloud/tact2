@@ -535,6 +535,8 @@ canvas.addEventListener('wheel', e => {
 
 // ---- Touch (direct, no synthetic mouse events) ----
 let lastTouchDist = 0;
+let recentTouchActive = false;
+document.addEventListener('touchstart', () => { recentTouchActive = true; }, { capture: true, passive: true });
 let pinchActive = false;
 let pinchCenter = null;
 let touchDragIdx = -1;
@@ -1521,14 +1523,15 @@ function teardownFsToolbars() {
 function onFullscreenChange() {
   const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
   document.getElementById('btnFullscreen').textContent = isFS ? '✕ Exit' : '⛶ Full';
-  if (!isFS && viewLocked && !fullscreenManualExit) {
+  if (!isFS && !fullscreenManualExit && recentTouchActive) {
     setTimeout(() => {
       const wrap = document.getElementById('canvasWrap');
       const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
       fn.call(wrap).catch(() => {});
-    }, 600);
+    }, 200);
   }
   fullscreenManualExit = false;
+  recentTouchActive = false;
   if (isFS) {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';

@@ -511,12 +511,8 @@ body {
   .canvas-wrap { padding: 4px; }
 }
 /* Fullscreen via Fullscreen API */
-#canvasWrap:-webkit-full-screen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; }
-#canvasWrap:fullscreen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; }
-#canvasWrap:-webkit-full-screen .tablet-reset-btn { display: none; }
-#canvasWrap:fullscreen .tablet-reset-btn { display: none; }
-#canvasWrap:-webkit-full-screen .status-bar { display: none; }
-#canvasWrap:fullscreen .status-bar { display: none; }
+#canvasWrap:-webkit-full-screen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; touch-action: none; -webkit-overflow-scrolling: none; overscroll-behavior: none; }
+#canvasWrap:fullscreen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; touch-action: none; -webkit-overflow-scrolling: none; overscroll-behavior: none; }
 @media (max-width: 768px) {
   .topbar .toggle-label { font-size: 7px; }
   #widthLabel, #opacityLabel, #textSizeLabel { min-width: auto; }

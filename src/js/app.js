@@ -541,14 +541,9 @@ let touchDragIdx = -1;
 
 function isOverlayBtn(el) {
   while (el) {
-    if (el.classList && el.classList.contains('tablet-reset-btn')) return true;
-    el = el.parentElement;
-  }
-  return false;
-}
-function isInCanvasWrap(el) {
-  while (el) {
-    if (el.id === 'canvasWrap') return true;
+    if (el.classList && (el.classList.contains('tablet-reset-btn') || el.classList.contains('toolbar') || el.classList.contains('topbar'))) return true;
+    if (el.classList && el.classList.contains('fs-overlay-toolbar')) return true;
+    if (el.classList && el.classList.contains('fs-overlay-topbar')) return true;
     el = el.parentElement;
   }
   return false;
@@ -1469,11 +1464,11 @@ document.getElementById('btnResetView').addEventListener('click', () => {
 });
 
 document.getElementById('btnFullscreen').addEventListener('click', () => {
-  const app = document.getElementById('app');
+  const wrap = document.getElementById('canvasWrap');
   const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
   if (!fsEl) {
-    const fn = app.requestFullscreen || app.webkitRequestFullscreen;
-    fn.call(app).catch(() => {});
+    const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+    fn.call(wrap).catch(() => {});
   } else {
     fullscreenManualExit = true;
     const fn = document.exitFullscreen || document.webkitExitFullscreen;
@@ -1481,16 +1476,67 @@ document.getElementById('btnFullscreen').addEventListener('click', () => {
   }
 });
 
+// ---- Fullscreen overlay toolbar (auto-hide) ----
+let fsHideTimer = null;
+let fsRestore = null;
+
+function showFsOverlays() {
+  document.querySelectorAll('.fs-overlay-toolbar, .fs-overlay-topbar').forEach(el => el.classList.remove('fs-hidden'));
+}
+function hideFsOverlays() {
+  document.querySelectorAll('.fs-overlay-toolbar, .fs-overlay-topbar').forEach(el => el.classList.add('fs-hidden'));
+}
+function resetFsHideTimer() {
+  showFsOverlays();
+  if (fsHideTimer) clearTimeout(fsHideTimer);
+  fsHideTimer = setTimeout(hideFsOverlays, 3000);
+}
+
+function setupFsToolbars() {
+  const wrap = document.getElementById('canvasWrap');
+  const toolbar = document.querySelector('.toolbar');
+  const topbar = document.querySelector('.topbar');
+  if (fsRestore) return;
+  fsRestore = {
+    toolbarParent: toolbar.parentNode,
+    toolbarNext: toolbar.nextSibling,
+    topbarParent: topbar.parentNode,
+    topbarNext: topbar.nextSibling
+  };
+  wrap.appendChild(toolbar);
+  wrap.appendChild(topbar);
+  toolbar.classList.add('fs-overlay-toolbar');
+  topbar.classList.add('fs-overlay-topbar');
+  // Show initially, auto-hide after 3s
+  resetFsHideTimer();
+  // Listen for any interaction inside canvasWrap to reset hide timer
+  wrap.addEventListener('touchstart', resetFsHideTimer, { passive: true });
+  wrap.addEventListener('mousedown', resetFsHideTimer, { passive: true });
+}
+
+function teardownFsToolbars() {
+  if (!fsRestore) return;
+  const wrap = document.getElementById('canvasWrap');
+  const toolbar = document.querySelector('.toolbar');
+  const topbar = document.querySelector('.topbar');
+  toolbar.classList.remove('fs-overlay-toolbar');
+  topbar.classList.remove('fs-overlay-topbar');
+  fsRestore.toolbarParent.insertBefore(toolbar, fsRestore.toolbarNext);
+  fsRestore.topbarParent.insertBefore(topbar, fsRestore.topbarNext);
+  fsRestore = null;
+  if (fsHideTimer) { clearTimeout(fsHideTimer); fsHideTimer = null; }
+  wrap.removeEventListener('touchstart', resetFsHideTimer);
+  wrap.removeEventListener('mousedown', resetFsHideTimer);
+}
+
 function onFullscreenChange() {
   const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
   document.getElementById('btnFullscreen').textContent = isFS ? '✕ Exit' : '⛶ Full';
-  // When view is locked, auto-re-enter fullscreen if the user was kicked out
-  // by iPadOS system gestures (swipe down for Notification Center).
   if (!isFS && viewLocked && !fullscreenManualExit) {
     setTimeout(() => {
-      const app = document.getElementById('app');
-      const fn = app.requestFullscreen || app.webkitRequestFullscreen;
-      fn.call(app).catch(() => {});
+      const wrap = document.getElementById('canvasWrap');
+      const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+      fn.call(wrap).catch(() => {});
     }, 600);
   }
   fullscreenManualExit = false;
@@ -1503,6 +1549,7 @@ function onFullscreenChange() {
     document.documentElement.style.width = '100%';
     document.documentElement.style.height = '100%';
     document.documentElement.style.overflow = 'hidden';
+    setupFsToolbars();
   } else {
     document.body.style.position = '';
     document.body.style.width = '';
@@ -1512,8 +1559,8 @@ function onFullscreenChange() {
     document.documentElement.style.width = '';
     document.documentElement.style.height = '';
     document.documentElement.style.overflow = '';
+    teardownFsToolbars();
   }
-  // Give flex layout a frame to settle, then resize canvas
   requestAnimationFrame(() => resizeCanvas());
 }
 document.addEventListener('fullscreenchange', onFullscreenChange);
@@ -1522,13 +1569,12 @@ document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 // Block browser touch/mouse defaults in fullscreen to prevent page sliding
 function onFullscreenTouch(e) {
   if (document.fullscreenElement || document.webkitFullscreenElement) {
-    // Only prevent default on canvas touches (not toolbar/topbar/panel)
-    if (isInCanvasWrap(e.target) && !isOverlayBtn(e.target)) e.preventDefault();
+    if (!isOverlayBtn(e.target)) e.preventDefault();
   }
 }
 function onFullscreenMouse(e) {
   if (document.fullscreenElement || document.webkitFullscreenElement) {
-    if (isInCanvasWrap(e.target) && !isOverlayBtn(e.target)) e.preventDefault();
+    if (!isOverlayBtn(e.target)) e.preventDefault();
   }
 }
 document.addEventListener('touchstart', onFullscreenTouch, { passive: false, capture: true });

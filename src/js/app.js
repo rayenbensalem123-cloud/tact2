@@ -546,6 +546,13 @@ function isOverlayBtn(el) {
   }
   return false;
 }
+function isInCanvasWrap(el) {
+  while (el) {
+    if (el.id === 'canvasWrap') return true;
+    el = el.parentElement;
+  }
+  return false;
+}
 
 canvas.addEventListener('touchstart', e => { try {
   if (isOverlayBtn(e.target)) return;
@@ -1462,11 +1469,11 @@ document.getElementById('btnResetView').addEventListener('click', () => {
 });
 
 document.getElementById('btnFullscreen').addEventListener('click', () => {
-  const wrap = document.getElementById('canvasWrap');
+  const app = document.getElementById('app');
   const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
   if (!fsEl) {
-    const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
-    fn.call(wrap).catch(() => {});
+    const fn = app.requestFullscreen || app.webkitRequestFullscreen;
+    fn.call(app).catch(() => {});
   } else {
     fullscreenManualExit = true;
     const fn = document.exitFullscreen || document.webkitExitFullscreen;
@@ -1481,9 +1488,9 @@ function onFullscreenChange() {
   // by iPadOS system gestures (swipe down for Notification Center).
   if (!isFS && viewLocked && !fullscreenManualExit) {
     setTimeout(() => {
-      const wrap = document.getElementById('canvasWrap');
-      const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
-      fn.call(wrap).catch(() => {});
+      const app = document.getElementById('app');
+      const fn = app.requestFullscreen || app.webkitRequestFullscreen;
+      fn.call(app).catch(() => {});
     }, 600);
   }
   fullscreenManualExit = false;
@@ -1496,14 +1503,6 @@ function onFullscreenChange() {
     document.documentElement.style.width = '100%';
     document.documentElement.style.height = '100%';
     document.documentElement.style.overflow = 'hidden';
-    canvas.style.touchAction = 'none';
-    // Retry the body fix after a frame in case browser resets it
-    requestAnimationFrame(() => {
-      document.body.style.position = 'fixed';
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.position = 'fixed';
-      document.documentElement.style.overflow = 'hidden';
-    });
   } else {
     document.body.style.position = '';
     document.body.style.width = '';
@@ -1513,9 +1512,9 @@ function onFullscreenChange() {
     document.documentElement.style.width = '';
     document.documentElement.style.height = '';
     document.documentElement.style.overflow = '';
-    canvas.style.touchAction = '';
   }
-  resizeCanvas();
+  // Give flex layout a frame to settle, then resize canvas
+  requestAnimationFrame(() => resizeCanvas());
 }
 document.addEventListener('fullscreenchange', onFullscreenChange);
 document.addEventListener('webkitfullscreenchange', onFullscreenChange);
@@ -1523,12 +1522,13 @@ document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 // Block browser touch/mouse defaults in fullscreen to prevent page sliding
 function onFullscreenTouch(e) {
   if (document.fullscreenElement || document.webkitFullscreenElement) {
-    if (!isOverlayBtn(e.target)) e.preventDefault();
+    // Only prevent default on canvas touches (not toolbar/topbar/panel)
+    if (isInCanvasWrap(e.target) && !isOverlayBtn(e.target)) e.preventDefault();
   }
 }
 function onFullscreenMouse(e) {
   if (document.fullscreenElement || document.webkitFullscreenElement) {
-    if (!isOverlayBtn(e.target)) e.preventDefault();
+    if (isInCanvasWrap(e.target) && !isOverlayBtn(e.target)) e.preventDefault();
   }
 }
 document.addEventListener('touchstart', onFullscreenTouch, { passive: false, capture: true });

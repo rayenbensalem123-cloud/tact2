@@ -510,9 +510,11 @@ body {
   .panel-toggle { display: inline-flex !important; }
   .canvas-wrap { padding: 4px; }
 }
-/* Fullscreen via Fullscreen API */
-#canvasWrap:-webkit-full-screen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; touch-action: none; -webkit-overflow-scrolling: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-#canvasWrap:fullscreen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; touch-action: none; -webkit-overflow-scrolling: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* Fullscreen via Fullscreen API — full app so toolbar/topbar stay visible */
+#app:-webkit-full-screen { width: 100vw; height: 100vh; overflow: hidden; background: #0d0d1a; }
+#app:fullscreen { width: 100vw; height: 100vh; overflow: hidden; background: #0d0d1a; }
+#app:-webkit-full-screen .canvas-wrap { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#app:fullscreen .canvas-wrap { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 @media (max-width: 768px) {
   .topbar .toggle-label { font-size: 7px; }
   #widthLabel, #opacityLabel, #textSizeLabel { min-width: auto; }

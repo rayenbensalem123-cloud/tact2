@@ -1,0 +1,77 @@
+Script started on 2026-06-21 22:33:26+00:00 [COMMAND="/usr/local/bin/bun expo start --port 8081 --tunnel" <not executed on terminal>]
+[90menv: load .env.local[39m
+[90menv: export EXPO_PUBLIC_BLINK_PROJECT_ID EXPO_PUBLIC_BLINK_PUBLISHABLE_KEY BLINK_SECRET_KEY[39m
+[90mStarting project at /home/user[39m
+[2mStarting Metro Bundler[22m
+Tunnel connected.
+Tunnel ready.
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ ▄▄▄▄▄ █   █▄▄ ▄ ▄▄▀▄█ ▄▄▄▄▄ █
+█ █   █ █ ▀▄ █▀  ▀▄▄▄ █ █   █ █
+█ █▄▄▄█ █▀██▀▀ █▄▄▄▀▀██ █▄▄▄█ █
+█▄▄▄▄▄▄▄█▄▀▄█ █▄█ ▀▄█ █▄▄▄▄▄▄▄█
+█  ██  ▄▀▀▀▀▄▀▄ ▀ ▄▄▄▄█▀ ▀ ▄  █
+██▀▀ ▄ ▄█ █▀ ▄ ▄ ▀ █▀▀▄▀▄▀█▄  █
+███ ▀▀ ▄▄▀█▄█▄ ▀ ▀ ▄█▄█▀▀▀▄█▀▀█
+█▄  ▀▀ ▄ ▀▄▄█▀█▀ ▄ █▀▄█▀ ▄▄▄▀ █
+█▀▀  ▀█▄▀█▀▄▄▀▄▄▀▀▄▄█▄▄▀▄▀▄█▀ █
+███▄█▀ ▄▄  ▀ ▄ ▄▄▄ ▀▀▀ ▄██ ▄█ █
+█▄▄█▄██▄█▀  █▄ ▀ █  ▀ ▄▄▄ ▀█▄▀█
+█ ▄▄▄▄▄ █▀▄██▀█▀  ▀▄  █▄█ ▀█▀▄█
+█ █   █ █▄▄▄▄▀▄▄▀ ▄▀▄  ▄ ▄ ▀▄▀█
+█ █▄▄▄█ █▀▄▀ ▄ ▄    █ ▄█▀█▄█  █
+█▄▄▄▄▄▄▄█▄▄██▄▄█▄▄▄██▄██████▄██
+
+› Metro waiting on [4mexp://xa8u2li-blinknew-8081.exp.direct[24m
+› Scan the QR code above with Expo Go (Android) or the Camera app (iOS)
+
+› Web is waiting on [4mhttp://localhost:8081[24m
+
+› Using [36mExpo Go[39m
+› Press [1ms[22m [2m│[22m switch to development build
+
+› Press [1ma[22m [2m│[22m open Android
+› Press [1mw[22m [2m│[22m open web
+
+› Press [1mj[22m [2m│[22m open debugger
+› Press [1mr[22m [2m│[22m reload app
+› Press [1mm[22m [2m│[22m toggle menu
+› [1mshift+m[22m [2m│[22m more tools
+› Press [1mo[22m [2m│[22m open project code in your editor
+
+› Press [1m?[22m [2m│[22m show all commands
+
+Logs for your project will appear below.[2m Press Ctrl+C to exit.[22m
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [32m[42m▓▓▓▓▓▓▓▓▓▓[49m[39m[47m[37m░░░░░░[39m[49m[1m 64.0% [22m[2m(36/55)[22m
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [32m[42m▓▓▓▓▓▓▓▓▓▓[49m[39m[47m[37m░░░░░░[39m[49m[1m 64.0% [22m[2m(193/336)[22m
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [32m[42m▓▓▓▓▓▓▓▓▓▓[49m[39m[47m[37m░░░░░░[39m[49m[1m 64.0% [22m[2m(442/579)[22m
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [32m[42m▓▓▓▓▓▓▓▓▓▓[49m[39m[47m[37m░░░░░░[39m[49m[1m 64.0% [22m[2m( 885/2640)[22m
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [32m[42m▓▓▓▓▓▓▓▓▓▓[49m[39m[47m[37m░░░░░░[39m[49m[1m 64.0% [22m[2m(1919/2640)[22m
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [32m[42m▓▓▓▓▓▓▓▓▓▓▓▓▓▓[49m[39m[47m[37m░░[39m[49m[1m 92.1% [22m[2m(2697/2857)[22m
+[32m[1mWeb[22m Bundled [39m[2m23623ms[22m[0m[2m node_modules/expo-router/entry.js (2972 modules)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[32m[1mWeb[22m Bundled [39m[2m100ms[22m[0m[2m node_modules/expo-router/entry.js (1 module)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[32m[1mWeb[22m Bundled [39m[2m97ms[22m[0m[2m node_modules/expo-router/entry.js (1 module)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[32m[1mWeb[22m Bundled [39m[2m89ms[22m[0m[2m node_modules/expo-router/entry.js (1 module)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[32m[1mWeb[22m Bundled [39m[2m83ms[22m[0m[2m node_modules/expo-router/entry.js (1 module)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[32m[1mWeb[22m Bundled [39m[2m113ms[22m[0m[2m node_modules/expo-router/entry.js (1 module)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[32m[1mWeb[22m Bundled [39m[2m117ms[22m[0m[2m node_modules/expo-router/entry.js (1 module)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[1mWeb[22m [0m[2mnode_modules/expo-router/[22m[0m[1mentry.js[22m [47m[37m░░░░░░░░░░░░░░░░[39m[49m[1m  0.0% [22m[2m(0/1)[22m
+[32m[1mWeb[22m Bundled [39m[2m208ms[22m[0m[2m node_modules/expo-router/entry.js (1 module)[22m[0m
+[7m[37m[1m LOG [22m[39m[27m [web] Logs will appear in the browser console
+[0m[31merror[0m: Failed to run "[1mexpo[0m" due to signal [1mSIGKILL[0m
+
+Script done on 2026-06-21 22:37:33+00:00 [COMMAND_EXIT_CODE="137"]

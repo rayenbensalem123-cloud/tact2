@@ -522,7 +522,7 @@ body {
   .topbar select, .topbar input[type=color], .topbar button { font-size: 8px; height: 20px; padding: 1px 3px; }
   .topbar input[type=range] { width: 30px; }
   .topbar-sep { margin: 0 1px; }
-  .panel { width: 100%; border-left: none; border-top: 1px solid #1a1a3e; flex-shrink: 0; max-height: 200px; overflow-y: auto; }
+  .panel { width: 100%; border-left: none; border-top: 1px solid #1a1a3e; flex-shrink: 0; max-height: 200px; overflow-y: auto; display: flex; }
   .timeline-bar { flex-shrink: 0; height: 30px; }
   .timeline-bar .tl-section { gap: 2px; }
   .timeline-bar .tl-btn { font-size: 9px; height: 20px; padding: 1px 5px; }

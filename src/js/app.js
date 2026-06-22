@@ -1470,7 +1470,20 @@ document.getElementById('btnFullscreen').addEventListener('click', () => {
   const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
   if (!fsEl) {
     const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
-    fn.call(wrap).catch(() => {});
+    if (fn) {
+      fn.call(wrap).catch(() => {});
+    } else {
+      // Fullscreen API not supported (e.g. iPhone) — toggle CSS fullscreen
+      document.body.classList.toggle('phone-fs');
+      const isFs = document.body.classList.contains('phone-fs');
+      document.getElementById('btnFullscreen').textContent = isFs ? '✕ Exit' : '⛶ Full';
+      if (isFs) {
+        setupFsToolbars();
+      } else {
+        teardownFsToolbars();
+      }
+      resizeCanvas();
+    }
   } else {
     fullscreenManualExit = true;
     const fn = document.exitFullscreen || document.webkitExitFullscreen;

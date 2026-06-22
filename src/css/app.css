@@ -510,19 +510,26 @@ body {
   .panel-toggle { display: inline-flex !important; }
   .canvas-wrap { padding: 4px; }
 }
-@media (max-width: 600px) {
-  #app { flex-direction: column; overflow: hidden; }
-  .toolbar { width: 100%; flex-direction: row; height: 38px; padding: 2px 4px; overflow-x: auto; flex-shrink: 0; justify-content: center; }
+@media (max-width: 700px) {
+  #app { flex-direction: column; overflow-x: hidden; overflow-y: auto; }
+  .toolbar { width: 100%; flex-direction: row; height: 36px; padding: 2px 4px; overflow-x: auto; flex-shrink: 0; justify-content: center; }
   .tool-group { flex-direction: row; }
-  .tool-sep { width: 1px; height: 24px; margin: 0 3px; }
+  .tool-sep { width: 1px; height: 22px; margin: 0 3px; }
   .tool-btn { width: 28px; height: 28px; }
   .tool-btn svg { width: 14px; height: 14px; }
-  .topbar { display: none; }
-  .panel { display: none; }
-  .timeline-bar { display: none; }
+  .topbar { flex-wrap: wrap; min-height: auto; padding: 2px 4px; gap: 2px; overflow-x: auto; }
+  .topbar label { font-size: 8px; }
+  .topbar select, .topbar input[type=color], .topbar button { font-size: 8px; height: 20px; padding: 1px 3px; }
+  .topbar input[type=range] { width: 30px; }
+  .topbar-sep { margin: 0 1px; }
+  .panel { width: 100%; border-left: none; border-top: 1px solid #1a1a3e; flex-shrink: 0; max-height: 200px; overflow-y: auto; }
+  .timeline-bar { flex-shrink: 0; height: 30px; }
+  .timeline-bar .tl-section { gap: 2px; }
+  .timeline-bar .tl-btn { font-size: 9px; height: 20px; padding: 1px 5px; }
+  .timeline-bar .tl-track-wrap { min-width: 30px; }
   .status-bar { display: none; }
-  .main-area { flex: 1; min-height: 0; }
-  .canvas-wrap { padding: 2px; }
+  .main-area { flex: 1; min-height: 200px; display: flex; flex-direction: column; }
+  .canvas-wrap { flex: 1; padding: 2px; min-height: 200px; }
   #btnResetView { top: 4px; right: 54px; font-size: 9px; padding: 3px 5px; }
   #btnFullscreen { top: 4px; right: 4px; font-size: 9px; padding: 3px 5px; }
   #btnLockView { top: 28px; right: 4px; font-size: 9px; padding: 3px 5px; }
@@ -567,3 +574,13 @@ body {
   .topbar .toggle-label { font-size: 7px; }
   #widthLabel, #opacityLabel, #textSizeLabel { min-width: auto; }
 }
+/* Phone CSS fullscreen fallback (when Fullscreen API unavailable) */
+body.phone-fs { position: fixed; width: 100%; height: 100%; overflow: hidden; }
+body.phone-fs #app { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
+body.phone-fs .main-area { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+body.phone-fs #app > .toolbar,
+body.phone-fs #app > .main-area > .topbar,
+body.phone-fs #app > .panel,
+body.phone-fs .timeline-bar { display: none; }
+body.phone-fs #canvasWrap { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; border-radius: 0; z-index: 2; }
+body.phone-fs #pitchCanvas { border-radius: 2px; }

@@ -506,9 +506,28 @@ body {
   .topbar-sep { margin: 0 1px; }
   .panel { display: none; } /* Auto-hide panel; toggle via 📋 button */
   .timeline-bar { display: none; } /* Timeline bar hidden to save vertical space */
-  .status-bar { height: 16px; font-size: 8px; padding: 0 6px; gap: 8px; }
+  .status-bar { display: none; }
   .panel-toggle { display: inline-flex !important; }
   .canvas-wrap { padding: 4px; }
+}
+@media (max-width: 600px) {
+  #app { flex-direction: column; overflow: hidden; }
+  .toolbar { width: 100%; flex-direction: row; height: 38px; padding: 2px 4px; overflow-x: auto; flex-shrink: 0; justify-content: center; }
+  .tool-group { flex-direction: row; }
+  .tool-sep { width: 1px; height: 24px; margin: 0 3px; }
+  .tool-btn { width: 28px; height: 28px; }
+  .tool-btn svg { width: 14px; height: 14px; }
+  .topbar { display: none; }
+  .panel { display: none; }
+  .timeline-bar { display: none; }
+  .status-bar { display: none; }
+  .main-area { flex: 1; min-height: 0; }
+  .canvas-wrap { padding: 2px; }
+  #btnResetView { top: 4px; right: 54px; font-size: 9px; padding: 3px 5px; }
+  #btnFullscreen { top: 4px; right: 4px; font-size: 9px; padding: 3px 5px; }
+  #btnLockView { top: 28px; right: 4px; font-size: 9px; padding: 3px 5px; }
+  #btnClearCanvas { top: 28px; right: 54px; font-size: 9px; padding: 3px 5px; }
+  #pitchCanvas { border-radius: 2px; box-shadow: 0 2px 20px rgba(0,0,0,.5); }
 }
 /* Fullscreen via Fullscreen API — pitch fills screen, overlays on top */
 #canvasWrap:-webkit-full-screen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; overflow: hidden; touch-action: none; overscroll-behavior: none; -webkit-overflow-scrolling: none; }

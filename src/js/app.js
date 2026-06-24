@@ -50,7 +50,7 @@ let selectedDrawingIndex = -1;
 // ---- Resize ----
 function resizeCanvas() {
   const r = wrap.getBoundingClientRect();
-  const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const isFS = isFs();
   const isTablet = window.innerWidth <= 1024;
   const pad = isFS ? 0 : (isTablet ? 6 : 20);
   const statusH = isFS ? 0 : (isTablet ? 16 : 24);
@@ -614,7 +614,7 @@ canvas.addEventListener('touchstart', e => { try {
         players.selectedIndices.clear();
         equipment.selectedIndices.clear();
         players.selected = null;
-        if (document.fullscreenElement || document.webkitFullscreenElement) toggleFsOverlays();
+        if (isFs()) toggleFsOverlays();
       }
     }
     updateUI(); render();
@@ -1390,7 +1390,138 @@ document.getElementById('btnDeletePlayer').addEventListener('click', deleteSelec
 document.getElementById('btnDuplicate').addEventListener('click', duplicateSelection);
 
 let viewLocked = false;
-let fullscreenManualExit = false;
+// ---- Fullscreen (unified: real Fullscreen API + CSS fallback) ----
+let fsUiState = null;
+let fsManualExit = false;
+
+function isFs() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement) || document.body.classList.contains('fs-active');
+}
+
+function enterFs() {
+  const wrap = document.getElementById('canvasWrap');
+  const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+  if (fn) { fn.call(wrap).catch(() => activateFsCSS()); }
+  else { activateFsCSS(); }
+}
+
+function exitFs() {
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    fsManualExit = true;
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document).catch(() => {});
+  } else if (document.body.classList.contains('fs-active')) {
+    deactivateFsCSS();
+  }
+}
+
+function activateFsCSS() {
+  document.body.classList.add('fs-active');
+  ['html','body'].forEach(t => {
+    const el = t === 'html' ? document.documentElement : document.body;
+    el.style.position = 'fixed'; el.style.width = '100%'; el.style.height = '100%'; el.style.overflow = 'hidden';
+  });
+  setupFsUI();
+  document.getElementById('btnFullscreen').textContent = '✕ Exit';
+  requestAnimationFrame(() => resizeCanvas());
+}
+
+function deactivateFsCSS() {
+  document.body.classList.remove('fs-active');
+  ['html','body'].forEach(t => {
+    const el = t === 'html' ? document.documentElement : document.body;
+    el.style.position = ''; el.style.width = ''; el.style.height = ''; el.style.overflow = '';
+  });
+  teardownFsUI();
+  document.getElementById('btnFullscreen').textContent = '⛶ Full';
+  requestAnimationFrame(() => resizeCanvas());
+}
+
+function setupFsUI() {
+  if (fsUiState) return;
+  const wrap = document.getElementById('canvasWrap');
+  const toolbar = document.querySelector('.toolbar');
+  const topbar = document.querySelector('.topbar');
+  const panel = document.querySelector('.panel');
+  fsUiState = {
+    toolbarParent: toolbar.parentNode, toolbarNext: toolbar.nextSibling,
+    topbarParent: topbar.parentNode, topbarNext: topbar.nextSibling,
+    panelParent: panel.parentNode, panelNext: panel.nextSibling
+  };
+  wrap.appendChild(toolbar); wrap.appendChild(topbar); wrap.appendChild(panel);
+  toolbar.classList.add('fs-overlay-toolbar');
+  topbar.classList.add('fs-overlay-topbar');
+  panel.classList.add('fs-overlay-panel');
+}
+
+function teardownFsUI() {
+  if (!fsUiState) return;
+  const toolbar = document.querySelector('.toolbar');
+  const topbar = document.querySelector('.topbar');
+  const panel = document.querySelector('.panel');
+  toolbar.classList.remove('fs-overlay-toolbar');
+  topbar.classList.remove('fs-overlay-topbar');
+  panel.classList.remove('fs-overlay-panel');
+  fsUiState.toolbarParent.insertBefore(toolbar, fsUiState.toolbarNext);
+  fsUiState.topbarParent.insertBefore(topbar, fsUiState.topbarNext);
+  fsUiState.panelParent.insertBefore(panel, fsUiState.panelNext);
+  fsUiState = null;
+}
+
+function toggleFsOverlays() {
+  const els = document.querySelectorAll('.fs-overlay-toolbar, .fs-overlay-topbar, .fs-overlay-panel');
+  if (els.length === 0) return;
+  const hidden = els[0].classList.contains('fs-hidden');
+  els.forEach(el => el.classList.toggle('fs-hidden', !hidden));
+}
+
+function onFullscreenChange() {
+  const realFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  if (realFs) {
+    activateFsCSS();
+  } else if (!fsManualExit) {
+    // Any non-button exit (swipe, Escape, etc.) — re-enter immediately
+    setTimeout(() => {
+      const wrap = document.getElementById('canvasWrap');
+      (wrap.requestFullscreen || wrap.webkitRequestFullscreen).call(wrap).catch(() => deactivateFsCSS());
+    }, 0);
+  } else {
+    deactivateFsCSS();
+  }
+  fsManualExit = false;
+  document.getElementById('btnFullscreen').textContent = isFs() ? '✕ Exit' : '⛶ Full';
+  requestAnimationFrame(() => resizeCanvas());
+}
+document.addEventListener('fullscreenchange', onFullscreenChange);
+document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+function onFsTouch(e) {
+  if (isFs() && !e.target.closest('.fs-overlay-toolbar,.fs-overlay-topbar,.fs-overlay-panel,.tablet-reset-btn')) {
+    e.preventDefault();
+  }
+}
+document.addEventListener('touchstart', onFsTouch, { passive: false, capture: true });
+document.addEventListener('touchmove', onFsTouch, { passive: false, capture: true });
+document.addEventListener('touchend', onFsTouch, { passive: false, capture: true });
+document.addEventListener('touchcancel', onFsTouch, { passive: false, capture: true });
+document.addEventListener('gesturestart', onFsTouch, { passive: false, capture: true });
+document.addEventListener('gesturechange', onFsTouch, { passive: false, capture: true });
+document.addEventListener('gestureend', onFsTouch, { passive: false, capture: true });
+window.addEventListener('touchstart', onFsTouch, { passive: false, capture: true });
+window.addEventListener('touchmove', onFsTouch, { passive: false, capture: true });
+window.addEventListener('touchend', onFsTouch, { passive: false, capture: true });
+window.addEventListener('touchcancel', onFsTouch, { passive: false, capture: true });
+
+document.getElementById('btnFullscreen').addEventListener('click', () => {
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    fsManualExit = true;
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document).catch(() => {});
+  } else if (document.body.classList.contains('fs-active')) {
+    deactivateFsCSS();
+  } else {
+    enterFs();
+  }
+});
+
 document.getElementById('btnLockView').addEventListener('click', () => {
   viewLocked = !viewLocked;
   document.getElementById('btnLockView').textContent = viewLocked ? '🔒 Locked' : '🔓 Lock';

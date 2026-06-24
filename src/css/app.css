@@ -575,12 +575,12 @@ body {
   #widthLabel, #opacityLabel, #textSizeLabel { min-width: auto; }
 }
 /* Phone CSS fullscreen fallback (when Fullscreen API unavailable) */
-body.phone-fs { position: fixed; width: 100%; height: 100%; overflow: hidden; }
-body.phone-fs #app { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
-body.phone-fs .main-area { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-body.phone-fs #app > .toolbar,
-body.phone-fs #app > .main-area > .topbar,
-body.phone-fs #app > .panel,
-body.phone-fs .timeline-bar { display: none; }
-body.phone-fs #canvasWrap { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; border-radius: 0; z-index: 2; }
-body.phone-fs #pitchCanvas { border-radius: 2px; }
+body.fs-active { position: fixed; width: 100%; height: 100%; overflow: hidden; }
+body.fs-active #app { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
+body.fs-active .main-area { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+body.fs-active #app > .toolbar,
+body.fs-active #app > .main-area > .topbar,
+body.fs-active #app > .panel,
+body.fs-active .timeline-bar { display: none !important; }
+body.fs-active #canvasWrap { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; border-radius: 0; z-index: 2; }
+body.fs-active #pitchCanvas { border-radius: 2px; }

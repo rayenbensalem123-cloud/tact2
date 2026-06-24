@@ -511,7 +511,8 @@ body {
   .canvas-wrap { padding: 4px; }
 }
 @media (max-width: 700px) {
-  #app { flex-direction: column; overflow-x: hidden; overflow-y: auto; }
+  html, body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #app { flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
   .toolbar { width: 100%; flex-direction: row; height: 36px; padding: 2px 4px; overflow-x: auto; flex-shrink: 0; justify-content: center; }
   .tool-group { flex-direction: row; }
   .tool-sep { width: 1px; height: 22px; margin: 0 3px; }
@@ -522,19 +523,20 @@ body {
   .topbar select, .topbar input[type=color], .topbar button { font-size: 8px; height: 20px; padding: 1px 3px; }
   .topbar input[type=range] { width: 30px; }
   .topbar-sep { margin: 0 1px; }
-  .panel { width: 100%; border-left: none; border-top: 1px solid #1a1a3e; flex-shrink: 0; max-height: 200px; overflow-y: auto; display: flex; }
+  .panel { width: 100%; border-left: none; border-top: 1px solid #1a1a3e; flex-shrink: 0; max-height: 180px; overflow-y: auto; display: flex; }
   .timeline-bar { flex-shrink: 0; height: 30px; display: flex; }
   .timeline-bar .tl-section { gap: 2px; }
   .timeline-bar .tl-btn { font-size: 9px; height: 20px; padding: 1px 5px; }
   .timeline-bar .tl-track-wrap { min-width: 30px; }
   .status-bar { display: none; }
-  .main-area { flex: 1; min-height: 200px; display: flex; flex-direction: column; }
-  .canvas-wrap { flex: 1; padding: 2px; min-height: 200px; }
+  .main-area { flex: none; min-height: 0; display: flex; flex-direction: column; }
+  .canvas-wrap { flex: none; height: 55vh; min-height: 240px; padding: 2px; touch-action: auto; }
+  #canvasWrap { touch-action: auto; }
+  #pitchCanvas { touch-action: auto; border-radius: 2px; box-shadow: 0 2px 20px rgba(0,0,0,.5); }
   #btnResetView { top: 4px; right: 54px; font-size: 9px; padding: 3px 5px; }
   #btnFullscreen { top: 4px; right: 4px; font-size: 9px; padding: 3px 5px; }
   #btnLockView { top: 28px; right: 4px; font-size: 9px; padding: 3px 5px; }
   #btnClearCanvas { top: 28px; right: 54px; font-size: 9px; padding: 3px 5px; }
-  #pitchCanvas { border-radius: 2px; box-shadow: 0 2px 20px rgba(0,0,0,.5); }
 }
 /* Fullscreen via Fullscreen API — pitch fills screen, overlays on top */
 #canvasWrap:-webkit-full-screen { width: 100vw; height: 100vh; padding: 0; background: #0d0d1a; overflow: hidden; touch-action: none; overscroll-behavior: none; -webkit-overflow-scrolling: none; }

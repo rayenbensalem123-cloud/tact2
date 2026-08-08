@@ -111,7 +111,7 @@ function renderToContext(c, scale, ox, oy) {
     const d = drawings.drawings[selectedDrawingIndex];
     const bounds = drawings.getBounds(d);
     if (bounds) {
-      c.strokeStyle = '#e94560'; c.lineWidth = 2 / scale; c.setLineDash([4 / scale, 3 / scale]);
+      c.strokeStyle = '#d9a441'; c.lineWidth = 2 / scale; c.setLineDash([4 / scale, 3 / scale]);
       c.strokeRect(bounds.x - 3 / scale, bounds.y - 3 / scale, bounds.w + 6 / scale, bounds.h + 6 / scale);
       c.setLineDash([]);
     }
@@ -421,7 +421,7 @@ canvas.addEventListener('mousemove', e => {
     const eIdx = equipment.findByCanvasPos(dev.x - pitchOffsetX, dev.y - pitchOffsetY, canvasScale);
     if (pIdx >= 0 || eIdx >= 0 || textHit >= 0) canvas.style.cursor = 'grab';
   } else if (currentTool === 'eraser') {
-    canvas.style.cursor = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Crect x=%224%22 y=%228%22 width=%2224%22 height=%2216%22 rx=%223%22 fill=%22%23e94560%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3Crect x=%228%22 y=%2212%22 width=%2216%22 height=%221%22 fill=%22%23fff%22/%3E%3Cpath d=%22M6 24 L14 28 L26 24%22 fill=%22none%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3C/svg%3E") 16 16, crosshair';
+    canvas.style.cursor = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Crect x=%224%22 y=%228%22 width=%2224%22 height=%2216%22 rx=%223%22 fill=%22%23c0483a%22 stroke=%22%237a2f24%22 stroke-width=%221.5%22/%3E%3Crect x=%228%22 y=%2212%22 width=%2216%22 height=%221%22 fill=%22%23fff%22/%3E%3Cpath d=%22M6 24 L14 28 L26 24%22 fill=%22none%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3C/svg%3E") 16 16, crosshair';
   } else canvas.style.cursor = 'crosshair';
 
   // Drag players (single or multi)
@@ -920,7 +920,7 @@ function setTool(tool) {
   dragStartPositions = null;
   currentTool = tool;
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
-  canvas.style.cursor = tool === 'select' ? 'default' : tool === 'eraser' ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Crect x=%224%22 y=%228%22 width=%2224%22 height=%2216%22 rx=%223%22 fill=%22%23e94560%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3Crect x=%228%22 y=%2212%22 width=%2216%22 height=%221%22 fill=%22%23fff%22/%3E%3Cpath d=%22M6 24 L14 28 L26 24%22 fill=%22none%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3C/svg%3E") 16 16, crosshair' : 'crosshair';
+  canvas.style.cursor = tool === 'select' ? 'default' : tool === 'eraser' ? 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Crect x=%224%22 y=%228%22 width=%2224%22 height=%2216%22 rx=%223%22 fill=%22%23c0483a%22 stroke=%22%237a2f24%22 stroke-width=%221.5%22/%3E%3Crect x=%228%22 y=%2212%22 width=%2216%22 height=%221%22 fill=%22%23fff%22/%3E%3Cpath d=%22M6 24 L14 28 L26 24%22 fill=%22none%22 stroke=%22%23900%22 stroke-width=%221.5%22/%3E%3C/svg%3E") 16 16, crosshair' : 'crosshair';
   document.getElementById('statusTool').textContent = tool.charAt(0).toUpperCase() + tool.slice(1);
 }
 
@@ -1132,7 +1132,7 @@ function updateUI() {
     const label = conn.type.charAt(0).toUpperCase() + conn.type.slice(1) + ' (' + conn.points.length + ' pts)';
     const dot = document.createElement('div'); dot.className = 'player-dot'; dot.style.background = conn.color; dot.textContent = conn.type === 'triangle' ? '△' : '—';
     const nameSpan = document.createElement('span'); nameSpan.className = 'player-name'; nameSpan.textContent = label;
-    const delBtn = document.createElement('button'); delBtn.textContent = '✕'; delBtn.style.cssText = 'background:none;border:none;color:#e94560;cursor:pointer;font-size:11px;margin-left:auto';
+    const delBtn = document.createElement('button'); delBtn.textContent = '✕'; delBtn.style.cssText = 'background:none;border:none;color:#c0483a;cursor:pointer;font-size:11px;margin-left:auto';
     delBtn.addEventListener('click', (e) => { e.stopPropagation(); removeConnection(ci); });
     div.appendChild(dot); div.appendChild(nameSpan); div.appendChild(delBtn);
     div.addEventListener('click', () => { selectedConnection = ci; render(); updateUI(); });
@@ -1838,7 +1838,7 @@ try {
   setTool('select');
 } catch (initErr) {
   console.error('Init error:', initErr);
-  document.getElementById('canvasWrap').innerHTML += '<div style="color:#e94560;padding:20px;text-align:center;font-size:14px">Error loading: ' + initErr.message + '</div>';
+  document.getElementById('canvasWrap').innerHTML += '<div style="color:#c0483a;padding:20px;text-align:center;font-size:14px">Error loading: ' + initErr.message + '</div>';
 }
 
 window.addEventListener('error', function(e) {
@@ -1847,7 +1847,7 @@ window.addEventListener('error', function(e) {
   if (document.getElementById('globalErrorBar')) return;
   const el = document.createElement('div');
   el.id = 'globalErrorBar';
-  el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#e94560;color:#fff;padding:10px 16px;font-size:14px;font-weight:bold;z-index:99999;text-align:center';
+  el.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c0483a;color:#fff;padding:10px 16px;font-size:14px;font-weight:bold;z-index:99999;text-align:center';
   el.textContent = 'Error: ' + errMsg;
   document.body.appendChild(el);
 });

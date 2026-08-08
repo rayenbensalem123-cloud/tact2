@@ -2,7 +2,7 @@ class PlayerManager {
   constructor() {
     this.players = [];
     this.selectedIndices = new Set();
-    this.homeColor = '#e94560';
+    this.homeColor = '#d64545';
     this.awayColor = '#4a9eff';
     this._faceCache = new Map();
   }

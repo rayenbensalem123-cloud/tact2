@@ -139,7 +139,7 @@ describe('PlayerManager', () => {
   });
 
   it('getColor returns correct team colors', () => {
-    expect(pm.getColor('home')).toBe('#e94560');
+    expect(pm.getColor('home')).toBe('#d64545');
     expect(pm.getColor('away')).toBe('#4a9eff');
   });
 

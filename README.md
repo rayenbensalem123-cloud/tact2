@@ -77,3 +77,6 @@ The app will be available at `http://localhost:3000`
 - The project uses Expo Router for navigation
 - Web version runs on port 3000 by default
 - Bun is 2-10x faster than npm for package installation 
+
+
+<!-- Dummy commit to trigger Vercel rebuild -->

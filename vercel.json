@@ -3,6 +3,6 @@
   "framework": null,
   "buildCommand": null,
   "installCommand": "echo skip",
-  "outputDirectory": "src",
+  "outputDirectory": ".",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

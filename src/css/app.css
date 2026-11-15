@@ -685,7 +685,65 @@ body {
 #canvasWrap:-webkit-full-screen .tablet-reset-btn { z-index: 26; }
 #canvasWrap:fullscreen .status-bar,
 #canvasWrap:-webkit-full-screen .status-bar { display: none; }
-/* Overlay right panel */
+/* Dropdown menu */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropbtn {
+  background: var(--line);
+  color: var(--sage);
+  padding: 4px 8px;
+  font-size: 9px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--panel-2);
+  min-width: 120px;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  z-index: 30;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.dropdown-content button {
+  background: transparent;
+  color: var(--sage);
+  padding: 6px 8px;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 9px;
+}
+
+.dropdown-content button:hover {
+  background: var(--line);
+  color: var(--chalk);
+}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+/* Right panel */
+.right-panel {
+  width: 260px;
+  background: var(--panel);
+  overflow-y: auto;
+  padding: 8px;
+  border-left: 1px solid var(--line);
+}
+
+.right-panel .panel-title {
+  color: var(--chalk);
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
 .fs-overlay-panel {
   position: absolute; top: 60px; right: 6px; bottom: 6px; z-index: 24;
   width: 220px; border-radius: 8px;
